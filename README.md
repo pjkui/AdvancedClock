@@ -121,6 +121,56 @@ C:\Users\YourUsername\AppData\Roaming\AdvancedClock\alarms.json
 - **序列化**：System.Text.Json
 - **定时器**：DispatcherTimer（每秒检查）
 - **注册表**：Microsoft.Win32.Registry
+- **CI/CD**：GitHub Actions 自动化构建
+
+## 🔨 开发与构建
+
+### 本地开发
+
+**前置要求**：
+- .NET 7.0 SDK
+- Visual Studio 2022 或 Rider
+
+**构建命令**：
+```powershell
+# 恢复依赖
+dotnet restore AdvancedClock.sln
+
+# 构建项目
+dotnet build AdvancedClock.sln --configuration Release
+
+# 发布应用
+dotnet publish AdvancedClock.csproj --configuration Release --output ./publish
+```
+
+### GitHub Actions 自动化
+
+本项目已配置 GitHub Actions 自动化工作流：
+
+- ✅ **自动构建**：推送代码时自动编译
+- ✅ **多配置支持**：同时构建 Debug 和 Release 版本
+- ✅ **产物上传**：构建完成后自动上传可执行文件
+- ✅ **多分支支持**：支持 main 和 master 分支
+- ✅ **环境变量管理**：所有配置项集中在 `env` 中，易于维护
+
+**配置文件位置**：`.github/workflows/dotnet-desktop.yml`
+
+**环境变量配置**：
+```yaml
+env:
+  PROJECT_NAME: AdvancedClock              # 项目名称
+  SOLUTION_FILE: AdvancedClock.sln         # 解决方案文件
+  PROJECT_FILE: AdvancedClock.csproj       # 项目文件
+  DOTNET_VERSION: 7.0.x                    # .NET 版本
+  PUBLISH_OUTPUT_DIR: ./publish            # 输出目录
+  ARTIFACT_RETENTION_DAYS: 30              # 保留天数
+```
+
+**查看构建状态**：访问仓库的 Actions 标签页
+
+**下载构建产物**：在 Actions 页面的成功构建记录中下载
+
+详细信息请参阅：[GitHub Actions 使用指南](GITHUB_ACTIONS_GUIDE.md)
 
 ## 📝 注意事项
 
@@ -204,6 +254,26 @@ C:\Users\YourUsername\AppData\Roaming\AdvancedClock\alarms.json
 - ✅ 实时时钟显示
 
 ## 最近更新
+
+### 2025-12-03 优化 GitHub Actions 配置 - 环境变量管理 🆕
+- ✅ 将所有配置项提取到 `env` 环境变量中
+- ✅ 移除硬编码，提高配置的可维护性和可重用性
+- ✅ 添加详细的环境变量配置说明文档
+- ✅ 支持快速适配其他项目
+
+### 2025-12-03 修复 GitHub Actions 自动化构建配置
+- ✅ 修复了 GitHub Actions 配置文件的错误
+- ✅ 更新 .NET 版本从 8.0 到 7.0 匹配项目配置
+- ✅ 简化构建流程，移除不必要的打包和签名步骤
+- ✅ 使用实际的项目名称替换占位符
+- ✅ 添加自动化构建产物上传功能
+- ✅ 创建 GitHub Actions 使用指南文档
+
+### 2025-12-03 修复强提醒窗口关闭按钮显示问题
+- ✅ 修复了强提醒窗口关闭按钮被遮挡的问题
+- ✅ 增加窗口卡片高度从 400 到 550
+- ✅ 优化各元素的大小和间距，使布局更紧凑
+- ✅ 确保所有内容（图标、标题、时钟、消息、按钮）完整可见
 
 ### 2025-12-03 新增强提醒和弱提醒功能
 - ✅ 实现强提醒（全屏遮罩）功能
