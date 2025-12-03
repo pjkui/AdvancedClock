@@ -44,6 +44,7 @@ namespace AdvancedClock
         private AlarmRepeatMode _repeatMode;
         private bool _isEnabled;
         private string _message;
+        private bool _isStrongAlert;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -55,6 +56,7 @@ namespace AdvancedClock
             _repeatMode = AlarmRepeatMode.None;
             _isEnabled = true;
             _message = "闹钟时间到！";
+            _isStrongAlert = false;
         }
 
         /// <summary>
@@ -134,6 +136,19 @@ namespace AdvancedClock
             {
                 _message = value;
                 OnPropertyChanged(nameof(Message));
+            }
+        }
+
+        /// <summary>
+        /// 是否为强提醒（全屏遮罩）
+        /// </summary>
+        public bool IsStrongAlert
+        {
+            get => _isStrongAlert;
+            set
+            {
+                _isStrongAlert = value;
+                OnPropertyChanged(nameof(IsStrongAlert));
             }
         }
 

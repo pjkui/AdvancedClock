@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AdvancedClock"
         mc:Ignorable="d"
-        Title="闹钟编辑" Height="450" Width="500"
+        Title="闹钟编辑" Height="550" Width="500"
         WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize">
+        ResizeMode="CanResize" MinHeight="500" MinWidth="450">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -69,18 +69,22 @@
                      VerticalScrollBarVisibility="Auto"/>
         </StackPanel>
 
-        <!-- 启用状态 -->
+        <!-- 启用状态和强提醒 -->
         <StackPanel Grid.Row="4" Margin="0,0,0,15">
             <CheckBox IsChecked="{Binding IsEnabled}" Content="启用此闹钟" 
-                      FontSize="14" FontWeight="Bold"/>
+                      FontSize="14" FontWeight="Bold" Margin="0,0,0,8"/>
+            <CheckBox IsChecked="{Binding IsStrongAlert}" Content="强提醒（全屏遮罩）" 
+                      FontSize="14" Foreground="#FF5722"/>
+            <TextBlock Text="  提示：强提醒会以全屏遮罩方式显示，弱提醒会在任务栏显示通知" 
+                       FontSize="11" Foreground="#666666" Margin="20,5,0,0" TextWrapping="Wrap"/>
         </StackPanel>
 
         <!-- 说明信息 -->
-        <Border Grid.Row="5" Background="#FFF9E6" Padding="10" CornerRadius="5" 
-                Margin="0,0,0,15" BorderBrush="#FFD700" BorderThickness="1">
+        <Border Grid.Row="5" Background="#FFF9E6" Padding="8" CornerRadius="5" 
+                Margin="0,0,0,10" BorderBrush="#FFD700" BorderThickness="1">
             <StackPanel>
-                <TextBlock Text="循环模式说明：" FontWeight="Bold" Margin="0,0,0,5"/>
-                <TextBlock TextWrapping="Wrap" FontSize="12">
+                <TextBlock Text="循环模式说明：" FontWeight="Bold" Margin="0,0,0,3" FontSize="12"/>
+                <TextBlock TextWrapping="Wrap" FontSize="11" LineHeight="16">
                     • 不循环：闹钟只触发一次后自动禁用<LineBreak/>
                     • 每天：每天在设定的时间触发<LineBreak/>
                     • 每月：每月在设定的日期和时间触发<LineBreak/>
@@ -90,13 +94,15 @@
         </Border>
 
         <!-- 按钮 -->
-        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
             <Button Content="确定" Width="100" Height="35" Margin="0,0,10,0"
                     Click="OkButton_Click" IsDefault="True"
-                    Background="#4CAF50" Foreground="White" FontWeight="Bold"/>
+                    Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                    Cursor="Hand"/>
             <Button Content="取消" Width="100" Height="35"
                     Click="CancelButton_Click" IsCancel="True"
-                    Background="#9E9E9E" Foreground="White" FontWeight="Bold"/>
+                    Background="#9E9E9E" Foreground="White" FontWeight="Bold"
+                    Cursor="Hand"/>
         </StackPanel>
     </Grid>
 </Window>

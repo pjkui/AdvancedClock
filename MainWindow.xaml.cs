@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Media;
+using WinForms = System.Windows.Forms;
 
 namespace AdvancedClock
 {
@@ -19,10 +20,14 @@ namespace AdvancedClock
         private readonly DispatcherTimer _clockTimer;
         private readonly AlarmDataService _dataService;
         private readonly StartupService _startupService;
+        private WinForms.NotifyIcon? _notifyIcon;
 
         public MainWindow()
         {
             InitializeComponent();
+            
+            // 初始化任务栏通知图标
+            InitializeNotifyIcon();
 
             // 初始化数据服务
             _dataService = new AlarmDataService();
@@ -168,19 +173,75 @@ namespace AdvancedClock
         }
 
         /// <summary>
+        /// 初始化任务栏通知图标
+        /// </summary>
+        private void InitializeNotifyIcon()
+        {
+            _notifyIcon = new WinForms.NotifyIcon
+            {
+                Icon = System.Drawing.SystemIcons.Information,
+                Visible = true,
+                Text = "高级闹钟"
+            };
+            
+            _notifyIcon.BalloonTipClicked += (s, e) =>
+            {
+                this.Show();
+                this.WindowState = WindowState.Normal;
+                this.Activate();
+            };
+        }
+
+        /// <summary>
         /// 闹钟触发事件处理
         /// </summary>
         private void AlarmService_AlarmTriggered(object? sender, AlarmModel alarm)
         {
+            // 根据强提醒设置选择不同的提醒方式
+            if (alarm.IsStrongAlert)
+            {
+                // 强提醒：全屏遮罩
+                ShowStrongAlert(alarm);
+            }
+            else
+            {
+                // 弱提醒：任务栏通知
+                ShowWeakAlert(alarm);
+            }
+        }
+
+        /// <summary>
+        /// 显示强提醒（全屏遮罩）
+        /// </summary>
+        private void ShowStrongAlert(AlarmModel alarm)
+        {
+            // 在UI线程上显示强提醒窗口
+            Dispatcher.Invoke(() =>
+            {
+                var alertWindow = new StrongAlertWindow(alarm);
+                alertWindow.ShowDialog();
+            });
+        }
+
+        /// <summary>
+        /// 显示弱提醒（任务栏通知）
+        /// </summary>
+        private void ShowWeakAlert(AlarmModel alarm)
+        {
             // 播放系统提示音
             SystemSounds.Beep.Play();
 
-            // 显示闹钟消息
-            MessageBox.Show(
-                $"{alarm.Message}\n\n闹钟名称：{alarm.Name}\n触发时间：{DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-                "闹钟提醒",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            // 在UI线程上显示任务栏通知
+            Dispatcher.Invoke(() =>
+            {
+                if (_notifyIcon != null)
+                {
+                    _notifyIcon.BalloonTipTitle = $"闹钟提醒 - {alarm.Name}";
+                    _notifyIcon.BalloonTipText = $"{alarm.Message}\n\n触发时间：{DateTime.Now:HH:mm:ss}";
+                    _notifyIcon.BalloonTipIcon = WinForms.ToolTipIcon.Info;
+                    _notifyIcon.ShowBalloonTip(5000); // 显示5秒
+                }
+            });
         }
 
         /// <summary>
@@ -372,6 +433,13 @@ namespace AdvancedClock
             // 停止服务
             _alarmService.Stop();
             _clockTimer.Stop();
+            
+            // 清理任务栏图标
+            if (_notifyIcon != null)
+            {
+                _notifyIcon.Visible = false;
+                _notifyIcon.Dispose();
+            }
         }
     }
 }
