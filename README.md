@@ -1,5 +1,9 @@
 # 高级定时闹钟 (AdvancedClock)
 
+<p align="center">
+  <img src="assets/icon.svg" alt="AdvancedClock Icon" width="128" height="128">
+</p>
+
 一个功能强大的 WPF 定时闹钟应用程序，支持多种循环模式、数据持久化和开机自动启动。
 
 ## ✨ 主要功能
@@ -113,6 +117,20 @@ C:\Users\YourUsername\AppData\Roaming\AdvancedClock\alarms.json
 ]
 ```
 
+## 📁 项目结构
+
+项目采用清晰的目录结构组织：
+
+```
+AdvancedClock/
+├── assets/          # 图片和资源文件
+├── docs/            # 项目文档
+├── .github/         # GitHub 配置
+└── *.cs, *.xaml     # 源代码文件
+```
+
+**详细说明**：[项目结构文档](PROJECT_STRUCTURE.md)
+
 ## 🔧 技术特性
 
 - **框架**：.NET 7.0 + WPF
@@ -170,7 +188,7 @@ env:
 
 **下载构建产物**：在 Actions 页面的成功构建记录中下载
 
-详细信息请参阅：[GitHub Actions 使用指南](GITHUB_ACTIONS_GUIDE.md)
+详细信息请参阅：[GitHub Actions 使用指南](docs/GITHUB_ACTIONS_GUIDE.md)
 
 ## 📝 注意事项
 
@@ -253,9 +271,32 @@ env:
 - ✅ 闹钟管理界面
 - ✅ 实时时钟显示
 
+## 🎨 图标设计
+
+本项目拥有专业设计的应用图标：
+
+- **设计风格**：现代扁平化设计
+- **核心元素**：时钟表盘 + 双铃铛
+- **配色方案**：蓝色渐变（专业）+ 金黄色（提醒）
+- **文件格式**：SVG 矢量图（可无损缩放）
+
+**查看详情**：[图标设计指南](docs/ICON_GUIDE.md)
+
+**快速使用**：
+1. 访问 https://convertio.co/zh/svg-ico/ 转换 `assets/icon.svg` 为 `icon.ico`
+2. 修改 `AdvancedClock.csproj` 添加 `<ApplicationIcon>icon.ico</ApplicationIcon>`
+3. 重新编译项目即可
+
 ## 最近更新
 
-### 2025-12-03 优化 GitHub Actions 配置 - 环境变量管理 🆕
+### 2025-12-03 新增应用图标设计 🆕
+- ✅ 创建专业的 SVG 矢量图标
+- ✅ 现代扁平化设计风格
+- ✅ 融合时钟和铃铛元素，高辨识度
+- ✅ 提供完整的图标转换和使用指南
+- ✅ 支持多尺寸 ICO 格式转换
+
+### 2025-12-03 优化 GitHub Actions 配置 - 环境变量管理
 - ✅ 将所有配置项提取到 `env` 环境变量中
 - ✅ 移除硬编码，提高配置的可维护性和可重用性
 - ✅ 添加详细的环境变量配置说明文档
