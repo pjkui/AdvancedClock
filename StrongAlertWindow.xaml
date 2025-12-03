@@ -14,6 +14,15 @@
         ShowInTaskbar="False"
         ResizeMode="NoResize">
     <Grid>
+        <Grid.Resources>
+            <DropShadowEffect x:Key="DropShadowEffect" 
+                              Color="Black" 
+                              Direction="270" 
+                              ShadowDepth="5" 
+                              BlurRadius="20" 
+                              Opacity="0.5"/>
+        </Grid.Resources>
+        
         <!-- 中央提醒卡片 -->
         <Border Background="White" 
                 CornerRadius="15" 
@@ -23,14 +32,6 @@
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center"
                 Effect="{StaticResource DropShadowEffect}">
-            <Border.Resources>
-                <DropShadowEffect x:Key="DropShadowEffect" 
-                                  Color="Black" 
-                                  Direction="270" 
-                                  ShadowDepth="5" 
-                                  BlurRadius="20" 
-                                  Opacity="0.5"/>
-            </Border.Resources>
             
             <StackPanel>
                 <!-- 闹钟图标 -->
