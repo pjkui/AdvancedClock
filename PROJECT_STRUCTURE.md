@@ -16,8 +16,11 @@ AdvancedClock/
 ├── docs/                            # 文档目录
 │   ├── ICON_GUIDE.md                # 图标使用指南
 │   ├── ICON_FILES.md                # 图标文件清单
+│   ├── ICON_IMPLEMENTATION.md       # 图标实现说明
 │   ├── GITHUB_ACTIONS_GUIDE.md      # GitHub Actions 使用指南
-│   └── ALERT_TEST_GUIDE.md          # 闹钟测试指南
+│   ├── ALERT_TEST_GUIDE.md          # 闹钟测试指南
+│   ├── TRAY_GUIDE.md                # 系统托盘使用指南
+│   └── TRAY_TEST_GUIDE.md           # 系统托盘测试指南
 │
 ├── .github/                         # GitHub 配置目录
 │   └── workflows/
@@ -54,8 +57,11 @@ AdvancedClock/
 **包含文件**：
 - `ICON_GUIDE.md` - 图标设计说明和使用指南
 - `ICON_FILES.md` - 图标文件清单和技术规格
+- `ICON_IMPLEMENTATION.md` - 图标技术实现说明
 - `GITHUB_ACTIONS_GUIDE.md` - CI/CD 自动化构建指南
 - `ALERT_TEST_GUIDE.md` - 闹钟功能测试指南
+- `TRAY_GUIDE.md` - 系统托盘功能使用指南
+- `TRAY_TEST_GUIDE.md` - 系统托盘功能测试指南
 
 **用途**：
 - 提供详细的使用文档
@@ -210,19 +216,19 @@ $icoFile = "icon.ico"
 | 目录 | 文件数 | 说明 |
 |------|--------|------|
 | `assets/` | 3 | 图标和资源文件 |
-| `docs/` | 4 | 项目文档 |
+| `docs/` | 7 | 项目文档 |
 | `.github/workflows/` | 1 | CI/CD 配置 |
-| 根目录 | ~20 | 源代码和配置文件 |
+| 根目录 | ~21 | 源代码和配置文件 |
 
 ### 文件类型统计
 
 | 类型 | 数量 | 位置 |
 |------|------|------|
-| Markdown 文档 | 5 | docs/ + 根目录 |
+| Markdown 文档 | 8 | docs/ + 根目录 |
 | SVG 图标 | 1 | assets/ |
 | HTML 文件 | 1 | assets/ |
 | PowerShell 脚本 | 1 | assets/ |
-| C# 源文件 | ~10 | 根目录 |
+| C# 源文件 | ~12 | 根目录 |
 | XAML 文件 | ~5 | 根目录 |
 
 ## 🚀 快速导航
@@ -265,6 +271,7 @@ dotnet publish --configuration Release
 - [图标设计指南](docs/ICON_GUIDE.md) - 图标使用说明
 - [GitHub Actions 指南](docs/GITHUB_ACTIONS_GUIDE.md) - CI/CD 配置
 - [闹钟测试指南](docs/ALERT_TEST_GUIDE.md) - 功能测试
+- [系统托盘指南](docs/TRAY_GUIDE.md) - 托盘功能使用
 
 ---
 

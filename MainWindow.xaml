@@ -84,6 +84,10 @@
                               FontSize="14" VerticalAlignment="Center" Margin="0,0,20,0"
                               Checked="StartupCheckBox_Changed"
                               Unchecked="StartupCheckBox_Changed"/>
+                    <CheckBox x:Name="MinimizeToTrayCheckBox" Content="关闭时最小化到托盘" 
+                              FontSize="14" VerticalAlignment="Center" Margin="0,0,20,0"
+                              Checked="MinimizeToTrayCheckBox_Changed"
+                              Unchecked="MinimizeToTrayCheckBox_Changed"/>
                     <Button x:Name="ViewDataFileButton" Content="📁 查看数据文件" 
                             Width="120" Height="30" Click="ViewDataFileButton_Click"
                             Background="#9C27B0" Foreground="White" FontWeight="Bold"/>

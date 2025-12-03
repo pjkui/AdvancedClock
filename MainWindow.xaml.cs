@@ -20,11 +20,16 @@ namespace AdvancedClock
         private readonly DispatcherTimer _clockTimer;
         private readonly AlarmDataService _dataService;
         private readonly StartupService _startupService;
+        private readonly AppSettings _appSettings;
         private WinForms.NotifyIcon? _notifyIcon;
+        private bool _isReallyClosing = false;
 
         public MainWindow()
         {
             InitializeComponent();
+            
+            // 设置窗口图标
+            SetWindowIcon();
             
             // 初始化任务栏通知图标
             InitializeNotifyIcon();
@@ -32,6 +37,7 @@ namespace AdvancedClock
             // 初始化数据服务
             _dataService = new AlarmDataService();
             _startupService = new StartupService();
+            _appSettings = new AppSettings();
 
             // 初始化闹钟集合
             _alarms = new ObservableCollection<AlarmModel>();
@@ -61,6 +67,9 @@ namespace AdvancedClock
 
             // 更新开机启动状态显示
             UpdateStartupStatus();
+            
+            // 更新托盘设置状态显示
+            UpdateTraySettings();
         }
 
         /// <summary>
@@ -173,23 +182,107 @@ namespace AdvancedClock
         }
 
         /// <summary>
+        /// 设置窗口图标
+        /// </summary>
+        private void SetWindowIcon()
+        {
+            try
+            {
+                var customIcon = IconHelper.GetApplicationIcon();
+                if (customIcon != null)
+                {
+                    // 将 System.Drawing.Icon 转换为 WPF ImageSource
+                    using (var bitmap = customIcon.ToBitmap())
+                    {
+                        var hBitmap = bitmap.GetHbitmap();
+                        try
+                        {
+                            this.Icon = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                                hBitmap,
+                                IntPtr.Zero,
+                                System.Windows.Int32Rect.Empty,
+                                System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
+                        }
+                        finally
+                        {
+                            // 释放 HBitmap
+                            DeleteObject(hBitmap);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"设置窗口图标失败: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 释放 GDI 对象
+        /// </summary>
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        private static extern bool DeleteObject(IntPtr hObject);
+
+        /// <summary>
         /// 初始化任务栏通知图标
         /// </summary>
         private void InitializeNotifyIcon()
         {
+            // 获取自定义图标，如果失败则使用系统默认图标
+            var customIcon = IconHelper.GetApplicationIcon();
+            
             _notifyIcon = new WinForms.NotifyIcon
             {
-                Icon = System.Drawing.SystemIcons.Information,
+                Icon = customIcon ?? System.Drawing.SystemIcons.Information,
                 Visible = true,
                 Text = "高级闹钟"
             };
             
+            // 气泡提示点击事件
             _notifyIcon.BalloonTipClicked += (s, e) =>
             {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-                this.Activate();
+                ShowMainWindow();
             };
+            
+            // 双击托盘图标显示窗口
+            _notifyIcon.DoubleClick += (s, e) =>
+            {
+                ShowMainWindow();
+            };
+            
+            // 创建右键菜单
+            var contextMenu = new WinForms.ContextMenuStrip();
+            
+            var showMenuItem = new WinForms.ToolStripMenuItem("显示主窗口");
+            showMenuItem.Click += (s, e) => ShowMainWindow();
+            contextMenu.Items.Add(showMenuItem);
+            
+            contextMenu.Items.Add(new WinForms.ToolStripSeparator());
+            
+            var exitMenuItem = new WinForms.ToolStripMenuItem("退出程序");
+            exitMenuItem.Click += (s, e) => ExitApplication();
+            contextMenu.Items.Add(exitMenuItem);
+            
+            _notifyIcon.ContextMenuStrip = contextMenu;
+        }
+        
+        /// <summary>
+        /// 显示主窗口
+        /// </summary>
+        private void ShowMainWindow()
+        {
+            this.Show();
+            this.WindowState = WindowState.Normal;
+            this.Activate();
+        }
+        
+        /// <summary>
+        /// 退出应用程序
+        /// </summary>
+        private void ExitApplication()
+        {
+            _isReallyClosing = true;
+            this.Close();
         }
 
         /// <summary>
@@ -371,6 +464,14 @@ namespace AdvancedClock
             bool isEnabled = _startupService.IsStartupEnabled();
             StartupCheckBox.IsChecked = isEnabled;
         }
+        
+        /// <summary>
+        /// 更新托盘设置状态显示
+        /// </summary>
+        private void UpdateTraySettings()
+        {
+            MinimizeToTrayCheckBox.IsChecked = _appSettings.MinimizeToTray;
+        }
 
         /// <summary>
         /// 开机启动复选框改变
@@ -392,6 +493,17 @@ namespace AdvancedClock
                     // 恢复原状态
                     StartupCheckBox.IsChecked = _startupService.IsStartupEnabled();
                 }
+            }
+        }
+        
+        /// <summary>
+        /// 最小化到托盘复选框改变
+        /// </summary>
+        private void MinimizeToTrayCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            if (MinimizeToTrayCheckBox.IsChecked.HasValue)
+            {
+                _appSettings.MinimizeToTray = MinimizeToTrayCheckBox.IsChecked.Value;
             }
         }
 
@@ -420,6 +532,30 @@ namespace AdvancedClock
             }
         }
 
+        /// <summary>
+        /// 窗口关闭事件（处理最小化到托盘）
+        /// </summary>
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            
+            // 如果不是真正关闭，且启用了托盘功能，则最小化到托盘
+            if (!_isReallyClosing && _appSettings.MinimizeToTray)
+            {
+                e.Cancel = true;
+                this.Hide();
+                
+                // 显示气泡提示
+                if (_notifyIcon != null)
+                {
+                    _notifyIcon.BalloonTipTitle = "高级闹钟";
+                    _notifyIcon.BalloonTipText = "程序已最小化到系统托盘，双击图标可打开窗口。";
+                    _notifyIcon.BalloonTipIcon = WinForms.ToolTipIcon.Info;
+                    _notifyIcon.ShowBalloonTip(3000);
+                }
+            }
+        }
+        
         /// <summary>
         /// 窗口关闭时停止服务
         /// </summary>
