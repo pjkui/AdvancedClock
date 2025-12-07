@@ -18,7 +18,7 @@ VS Code 会自动推荐以下扩展，请确保已安装：
 - **Path Intellisense** (`christian-kohler.path-intellisense`) - 路径自动完成
 
 ### 系统要求
-- .NET 7.0 SDK
+- .NET 8.0 SDK
 - Windows 10/11（WPF 应用程序）
 - VS Code 1.70+
 

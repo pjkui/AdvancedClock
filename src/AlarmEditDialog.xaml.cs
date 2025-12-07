@@ -9,7 +9,6 @@ namespace AdvancedClock
     public partial class AlarmEditDialog : Window
     {
         public AlarmModel AlarmModel { get; private set; }
-        private readonly bool _isEditMode;
 
         /// <summary>
         /// 构造函数（新建模式）
@@ -17,7 +16,6 @@ namespace AdvancedClock
         public AlarmEditDialog()
         {
             InitializeComponent();
-            _isEditMode = false;
             AlarmModel = new AlarmModel();
             DataContext = AlarmModel;
             Title = "添加闹钟";
@@ -32,7 +30,6 @@ namespace AdvancedClock
         public AlarmEditDialog(AlarmModel alarm)
         {
             InitializeComponent();
-            _isEditMode = true;
             AlarmModel = alarm;
             DataContext = AlarmModel;
             Title = "编辑闹钟";

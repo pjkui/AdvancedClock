@@ -16,7 +16,28 @@ namespace AdvancedClock
         public StartupService()
         {
             // 获取当前可执行文件路径
-            _executablePath = Assembly.GetExecutingAssembly().Location.Replace(".dll", ".exe");
+            // 在单文件发布模式下，Assembly.Location 可能返回空字符串
+            // 使用 Environment.ProcessPath 或 AppContext.BaseDirectory 作为备选
+            string? processPath = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(processPath))
+            {
+                _executablePath = processPath;
+            }
+            else
+            {
+                // 备选方案：使用 Assembly.Location 并替换扩展名
+                string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+                if (!string.IsNullOrEmpty(assemblyLocation))
+                {
+                    _executablePath = assemblyLocation.Replace(".dll", ".exe");
+                }
+                else
+                {
+                    // 最后的备选方案：使用 AppContext.BaseDirectory
+                    string baseDir = AppContext.BaseDirectory;
+                    _executablePath = Path.Combine(baseDir, "AdvancedClock.exe");
+                }
+            }
         }
 
         /// <summary>
