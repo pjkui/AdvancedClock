@@ -193,6 +193,7 @@ dotnet publish AdvancedClock.csproj --configuration Release --output ./publish
 - ✅ **自动构建**：推送代码时自动编译
 - ✅ **多配置支持**：同时构建 Debug 和 Release 版本
 - ✅ **产物上传**：构建完成后自动上传可执行文件
+- ✅ **自动发布**：推送版本标签时自动创建 GitHub Release 🆕
 - ✅ **多分支支持**：支持 main 和 master 分支
 - ✅ **环境变量管理**：所有配置项集中在 `env` 中，易于维护
 
@@ -209,11 +210,36 @@ env:
   ARTIFACT_RETENTION_DAYS: 30              # 保留天数
 ```
 
+### 🚀 自动发布到 Release 🆕
+
+**快速发布**：
+```powershell
+# 使用自动化脚本创建发布
+.\scripts\create-release.ps1 -Version "v1.0.0" -Message "版本 1.0.0 正式发布"
+```
+
+**手动发布**：
+```bash
+# 创建版本标签
+git tag -a v1.0.0 -m "版本 1.0.0 发布"
+git push origin v1.0.0
+```
+
+**自动化流程**：
+1. 推送版本标签（如 `v1.0.0`）
+2. GitHub Actions 自动构建 Release 版本
+3. 自动打包为 ZIP 文件
+4. 自动创建 GitHub Release
+5. 自动上传安装包到 Release 页面
+6. 自动生成更新日志
+
 **查看构建状态**：访问仓库的 Actions 标签页
 
 **下载构建产物**：在 Actions 页面的成功构建记录中下载
 
-详细信息请参阅：[GitHub Actions 使用指南](docs/GITHUB_ACTIONS_GUIDE.md)
+详细信息请参阅：
+- [GitHub Actions 使用指南](docs/GITHUB_ACTIONS_GUIDE.md)
+- [自动发布指南](docs/RELEASE_GUIDE.md) 🆕
 
 ## 📝 注意事项
 

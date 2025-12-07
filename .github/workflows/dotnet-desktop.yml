@@ -1,11 +1,12 @@
 # GitHub Actions workflow for AdvancedClock WPF Application
-# This workflow builds and tests the WPF desktop application
+# This workflow builds, tests, and releases the WPF desktop application
 
-name: .NET WPF Desktop Build
+name: .NET WPF Desktop Build & Release
 
 on:
   push:
     branches: [ "main", "master" ]
+    tags: [ "v*" ]  # 触发版本标签发布
   pull_request:
     branches: [ "main", "master" ]
 
@@ -21,6 +22,9 @@ env:
   # 构建配置
   PUBLISH_OUTPUT_DIR: ./publish
   ARTIFACT_RETENTION_DAYS: 30
+  
+  # 发布配置
+  RELEASE_CONFIGURATION: Release
 
 jobs:
   build:
@@ -53,7 +57,32 @@ jobs:
 
     # 发布应用程序（创建可执行文件）
     - name: Publish
-      run: dotnet publish ${{ env.PROJECT_FILE }} --configuration ${{ matrix.configuration }} --output ${{ env.PUBLISH_OUTPUT_DIR }}/${{ matrix.configuration }} --no-build
+      run: dotnet publish ${{ env.PROJECT_FILE }} --configuration ${{ matrix.configuration }} --output ${{ env.PUBLISH_OUTPUT_DIR }}/${{ matrix.configuration }} --no-build --self-contained false
+
+    # 创建发布包（仅 Release 配置）
+    - name: Create Release Package
+      if: matrix.configuration == 'Release'
+      run: |
+        # 创建发布目录
+        $releaseDir = "${{ env.PUBLISH_OUTPUT_DIR }}/Release"
+        $packageDir = "${{ env.PUBLISH_OUTPUT_DIR }}/Package"
+        New-Item -ItemType Directory -Force -Path $packageDir
+        
+        # 复制必要文件
+        Copy-Item -Path "$releaseDir/*" -Destination $packageDir -Recurse -Force
+        
+        # 创建 ZIP 包
+        $zipName = "${{ env.PROJECT_NAME }}-v${{ github.ref_name }}-windows-x64.zip"
+        if ("${{ github.ref_type }}" -ne "tag") {
+          $zipName = "${{ env.PROJECT_NAME }}-${{ github.sha }}-windows-x64.zip"
+        }
+        
+        Compress-Archive -Path "$packageDir/*" -DestinationPath "${{ env.PUBLISH_OUTPUT_DIR }}/$zipName" -Force
+        
+        # 输出包信息
+        echo "PACKAGE_NAME=$zipName" >> $env:GITHUB_ENV
+        echo "PACKAGE_PATH=${{ env.PUBLISH_OUTPUT_DIR }}/$zipName" >> $env:GITHUB_ENV
+      shell: powershell
 
     # 上传构建产物
     - name: Upload build artifacts
@@ -62,3 +91,101 @@ jobs:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.configuration }}
         path: ${{ env.PUBLISH_OUTPUT_DIR }}/${{ matrix.configuration }}
         retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+    # 上传发布包（仅 Release 配置）
+    - name: Upload Release Package
+      if: matrix.configuration == 'Release'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.PROJECT_NAME }}-Package
+        path: ${{ env.PACKAGE_PATH }}
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  # 自动发布到 GitHub Release（仅当推送标签时）
+  release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+    # 检出代码
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    # 下载构建产物
+    - name: Download Release Package
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.PROJECT_NAME }}-Package
+        path: ./release-assets
+
+    # 获取版本信息
+    - name: Get Version Info
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+
+    # 生成更新日志
+    - name: Generate Changelog
+      id: changelog
+      run: |
+        # 获取最新的标签
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        
+        if [ -z "$LATEST_TAG" ]; then
+          # 如果没有之前的标签，获取所有提交
+          CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+        else
+          # 获取自上次标签以来的提交
+          CHANGELOG=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+        fi
+        
+        # 如果没有更改，使用默认消息
+        if [ -z "$CHANGELOG" ]; then
+          CHANGELOG="- 版本更新和bug修复"
+        fi
+        
+        # 创建完整的发布说明
+        cat > release_notes.md << EOF
+        ## 🚀 ${{ steps.version.outputs.version }} 版本更新
+        
+        ### 📦 下载说明
+        - **Windows 用户**：下载 \`${{ env.PROJECT_NAME }}-${{ steps.version.outputs.version }}-windows-x64.zip\`
+        - 解压后运行 \`${{ env.PROJECT_NAME }}.exe\` 即可使用
+        - 需要安装 .NET 7.0 Runtime（如果系统中没有）
+        
+        ### 🔄 更新内容
+        $CHANGELOG
+        
+        ### 💡 使用提示
+        - 首次运行会创建示例闹钟
+        - 数据自动保存到用户目录：\`%AppData%\\${{ env.PROJECT_NAME }}\`
+        - 支持开机自启动和系统托盘功能
+        
+        ### 🐛 问题反馈
+        如遇到问题，请在 [Issues](https://github.com/${{ github.repository }}/issues) 中反馈。
+        EOF
+        
+        echo "Generated release notes:"
+        cat release_notes.md
+
+    # 创建 GitHub Release
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.version }}
+        name: ${{ env.PROJECT_NAME }} ${{ steps.version.outputs.version }}
+        body_path: release_notes.md
+        files: |
+          ./release-assets/*.zip
+        draft: false
+        prerelease: ${{ contains(steps.version.outputs.version, 'alpha') || contains(steps.version.outputs.version, 'beta') || contains(steps.version.outputs.version, 'rc') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

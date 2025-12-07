@@ -18,9 +18,13 @@ AdvancedClock/
 │   ├── ICON_FILES.md                # 图标文件清单
 │   ├── ICON_IMPLEMENTATION.md       # 图标实现说明
 │   ├── GITHUB_ACTIONS_GUIDE.md      # GitHub Actions 使用指南
+│   ├── RELEASE_GUIDE.md             # 自动发布指南 🆕
 │   ├── ALERT_TEST_GUIDE.md          # 闹钟测试指南
 │   ├── TRAY_GUIDE.md                # 系统托盘使用指南
 │   └── TRAY_TEST_GUIDE.md           # 系统托盘测试指南
+│
+├── scripts/                         # 脚本目录 🆕
+│   └── create-release.ps1           # 自动发布脚本 🆕
 │
 ├── .github/                         # GitHub 配置目录
 │   └── workflows/
@@ -67,6 +71,18 @@ AdvancedClock/
 - 提供详细的使用文档
 - 记录技术规格和设计决策
 - 帮助开发者快速上手
+
+### scripts/ - 脚本目录 🆕
+
+存放自动化脚本和工具。
+
+**包含文件**：
+- `create-release.ps1` - 自动创建版本发布的 PowerShell 脚本
+
+**用途**：
+- 简化版本发布流程
+- 自动化常见的开发任务
+- 提供便捷的工具脚本
 
 ### .github/ - GitHub 配置
 
