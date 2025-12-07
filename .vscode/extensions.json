@@ -1,0 +1,35 @@
+{
+    "recommendations": [
+        // .NET 和 C# 开发必备
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        
+        // XAML 支持
+        "redhat.vscode-xml",
+        "ms-vscode.vscode-xaml",
+        
+        // 调试和测试
+        "ms-vscode.test-adapter-converter",
+        "formulahendry.dotnet-test-explorer",
+        
+        // Git 和版本控制
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        
+        // 代码质量和格式化
+        "editorconfig.editorconfig",
+        "ms-vscode.powershell",
+        
+        // 实用工具
+        "ms-vscode.hexeditor",
+        "christian-kohler.path-intellisense",
+        "visualstudioexptteam.vscodeintellicode",
+        
+        // Markdown 支持
+        "yzhang.markdown-all-in-one",
+        "shd101wyy.markdown-preview-enhanced"
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.vscode-json"
+    ]
+}

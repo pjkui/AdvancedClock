@@ -1,0 +1,72 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "启动 AdvancedClock (Debug)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-debug",
+            "program": "${workspaceFolder}/bin/Debug/net7.0-windows/AdvancedClock.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "requireExactSource": false,
+            "enableStepFiltering": true,
+            "justMyCode": true,
+            "suppressJITOptimizations": true,
+            "symbolOptions": {
+                "searchPaths": [],
+                "searchMicrosoftSymbolServer": false,
+                "searchNuGetOrgSymbolServer": false
+            }
+        },
+        {
+            "name": "启动 AdvancedClock (Release)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-release",
+            "program": "${workspaceFolder}/bin/Release/net7.0-windows/AdvancedClock.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "requireExactSource": false,
+            "enableStepFiltering": true,
+            "justMyCode": false,
+            "suppressJITOptimizations": false
+        },
+        {
+            "name": "附加到 AdvancedClock 进程",
+            "type": "coreclr",
+            "request": "attach",
+            "processName": "AdvancedClock.exe"
+        },
+        {
+            "name": "启动 AdvancedClock (无预构建)",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/Debug/net7.0-windows/AdvancedClock.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "requireExactSource": false
+        },
+        {
+            "name": "启动 AdvancedClock (断点调试)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-debug",
+            "program": "${workspaceFolder}/bin/Debug/net7.0-windows/AdvancedClock.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": true,
+            "requireExactSource": true,
+            "enableStepFiltering": false,
+            "justMyCode": false,
+            "suppressJITOptimizations": true
+        }
+    ]
+}

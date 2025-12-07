@@ -2,5 +2,92 @@
     "codingcopilot.enableCompletionLanguage": {
         "php": true,
         "md": true
-    }
+    },
+    // .NET 和 C# 相关设置
+    "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true,
+    "dotnet.inlayHints.enableInlayHintsForParameters": true,
+    "dotnet.inlayHints.enableInlayHintsForLiteralParameters": true,
+    "dotnet.inlayHints.enableInlayHintsForIndexerParameters": true,
+    "dotnet.inlayHints.enableInlayHintsForObjectCreationParameters": true,
+    "dotnet.inlayHints.enableInlayHintsForOtherParameters": true,
+    "dotnet.inlayHints.enableInlayHintsForTypes": true,
+    "dotnet.inlayHints.enableInlayHintsForImplicitVariableTypes": true,
+    "dotnet.inlayHints.enableInlayHintsForLambdaParameterTypes": true,
+    "dotnet.inlayHints.enableInlayHintsForImplicitObjectCreation": true,
+    
+    // C# 调试设置
+    "csharp.debug.console": "internalConsole",
+    "csharp.debug.stopAtEntry": false,
+    "csharp.debug.justMyCode": true,
+    "csharp.debug.requireExactSource": false,
+    "csharp.debug.enableStepFiltering": true,
+    "csharp.debug.suppressJITOptimizations": true,
+    
+    // 文件关联
+    "files.associations": {
+        "*.xaml": "xml",
+        "*.csproj": "xml",
+        "*.sln": "plaintext"
+    },
+    
+    // 排除文件和文件夹
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true,
+        "**/.vs": true,
+        "**/TestResults": true,
+        "**/publish": true
+    },
+    
+    // 搜索排除
+    "search.exclude": {
+        "**/bin": true,
+        "**/obj": true,
+        "**/.vs": true,
+        "**/TestResults": true,
+        "**/publish": true,
+        "**/node_modules": true
+    },
+    
+    // 文件监视排除
+    "files.watcherExclude": {
+        "**/bin/**": true,
+        "**/obj/**": true,
+        "**/.vs/**": true,
+        "**/TestResults/**": true,
+        "**/publish/**": true
+    },
+    
+    // 编辑器设置
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    
+    // XAML 格式化
+    "[xml]": {
+        "editor.defaultFormatter": "redhat.vscode-xml",
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    
+    // C# 格式化
+    "[csharp]": {
+        "editor.defaultFormatter": "ms-dotnettools.csharp",
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": true
+    },
+    
+    // 终端设置
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.cwd": "${workspaceFolder}",
+    
+    // Git 设置
+    "git.ignoreLimitWarning": true,
+    "git.autofetch": true,
+    
+    // 扩展推荐
+    "extensions.showRecommendationsOnlyOnDemand": false
 }

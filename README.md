@@ -173,6 +173,7 @@ AdvancedClock/
 **前置要求**：
 - .NET 7.0 SDK
 - Visual Studio 2022 或 Rider
+- VS Code（推荐，已配置完整调试环境）🆕
 
 **构建命令**：
 ```powershell
@@ -185,6 +186,29 @@ dotnet build AdvancedClock.sln --configuration Release
 # 发布应用
 dotnet publish AdvancedClock.csproj --configuration Release --output ./publish
 ```
+
+### VS Code 调试环境 🆕
+
+项目已完整配置 VS Code 调试环境：
+
+- ✅ **多种调试配置**：Debug、Release、附加进程、断点调试等
+- ✅ **自动化任务**：构建、发布、清理、监视等
+- ✅ **扩展推荐**：自动推荐必需的 C# 和 .NET 扩展
+- ✅ **代码格式化**：EditorConfig 统一代码风格
+- ✅ **智能提示**：完整的 IntelliSense 支持
+
+**快速开始**：
+1. 在 VS Code 中打开项目文件夹
+2. 安装推荐的扩展
+3. 按 `F5` 开始调试
+
+**调试配置**：
+- **启动 AdvancedClock (Debug)** - 默认调试配置
+- **启动 AdvancedClock (Release)** - 性能测试配置
+- **附加到 AdvancedClock 进程** - 附加到运行中的进程
+- **启动 AdvancedClock (断点调试)** - 深度调试配置
+
+**详细说明**：[VS Code 调试指南](docs/VSCODE_DEBUG_GUIDE.md) 🆕
 
 ### GitHub Actions 自动化
 
@@ -240,6 +264,7 @@ git push origin v1.0.0
 详细信息请参阅：
 - [GitHub Actions 使用指南](docs/GITHUB_ACTIONS_GUIDE.md)
 - [自动发布指南](docs/RELEASE_GUIDE.md) 🆕
+- [VS Code 调试指南](docs/VSCODE_DEBUG_GUIDE.md) 🆕
 
 ## 📝 注意事项
 
