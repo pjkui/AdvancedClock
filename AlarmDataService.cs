@@ -62,7 +62,8 @@ namespace AdvancedClock
                         AlarmTime = alarm.AlarmTime,
                         RepeatMode = alarm.RepeatMode,
                         IsEnabled = alarm.IsEnabled,
-                        Message = alarm.Message
+                        Message = alarm.Message,
+                        IsStrongAlert = alarm.IsStrongAlert
                     });
                 }
 
@@ -114,7 +115,8 @@ namespace AdvancedClock
                             AlarmTime = dto.AlarmTime,
                             RepeatMode = dto.RepeatMode,
                             IsEnabled = dto.IsEnabled,
-                            Message = dto.Message
+                            Message = dto.Message,
+                            IsStrongAlert = dto.IsStrongAlert
                         });
                     }
                 }
@@ -138,6 +140,7 @@ namespace AdvancedClock
             public AlarmRepeatMode RepeatMode { get; set; }
             public bool IsEnabled { get; set; }
             public string Message { get; set; } = string.Empty;
+            public bool IsStrongAlert { get; set; }
         }
     }
 }
