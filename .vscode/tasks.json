@@ -150,6 +150,46 @@
                 "panel": "new"
             },
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "run-app",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/AdvancedClock.csproj",
+                "--configuration",
+                "Debug"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "focus": true
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "build-debug"
+        },
+        {
+            "label": "run-app-release",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/AdvancedClock.csproj",
+                "--configuration",
+                "Release"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "focus": true
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "build-release"
         }
     ]
 }

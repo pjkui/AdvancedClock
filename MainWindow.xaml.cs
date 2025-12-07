@@ -393,6 +393,18 @@ namespace AdvancedClock
         }
 
         /// <summary>
+        /// 闹钟列表双击事件
+        /// </summary>
+        private void AlarmListView_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (AlarmListView.SelectedItem is AlarmModel selectedAlarm)
+            {
+                var dialog = new AlarmEditDialog(selectedAlarm);
+                dialog.ShowDialog();
+            }
+        }
+
+        /// <summary>
         /// 闹钟列表选择改变
         /// </summary>
         private void AlarmListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
