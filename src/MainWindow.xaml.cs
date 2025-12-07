@@ -159,7 +159,8 @@ namespace AdvancedClock
                 AlarmTime = yearlyAlarm,
                 RepeatMode = AlarmRepeatMode.Yearly,
                 Message = "生日快乐！",
-                IsEnabled = true
+                IsEnabled = true,
+                IsStrongAlert = true  // 设置为强提醒示例
             };
             yearlyAlarmModel.PropertyChanged += Alarm_PropertyChanged;
             _alarms.Add(yearlyAlarmModel);

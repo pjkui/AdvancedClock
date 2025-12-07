@@ -168,6 +168,26 @@ AdvancedClock/
 
 ## 🔨 开发与构建
 
+### 项目结构
+
+```
+AdvancedClock/
+├── src/                          # 源代码目录
+│   ├── *.cs                      # C# 源代码文件
+│   ├── *.xaml                    # WPF 界面文件
+│   └── *.xaml.cs                 # WPF 代码后置文件
+├── docs/                         # 文档目录
+├── assets/                       # 资源文件目录
+├── scripts/                      # 脚本文件目录
+├── .github/                      # GitHub 配置目录
+├── .vscode/                      # VS Code 配置目录
+├── AdvancedClock.csproj          # 项目文件
+├── AdvancedClock.sln             # 解决方案文件
+└── README.md                     # 项目说明文件
+```
+
+详细的项目结构说明请参考：[docs/PROJECT_STRUCTURE_NEW.md](docs/PROJECT_STRUCTURE_NEW.md)
+
 ### 本地开发
 
 **前置要求**：
