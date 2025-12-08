@@ -102,6 +102,7 @@ namespace AdvancedClock
                 _alarmTime = value;
                 OnPropertyChanged(nameof(AlarmTime));
                 OnPropertyChanged(nameof(DisplayTime));
+                OnPropertyChanged(nameof(AdvanceStartTimeText));
             }
         }
 
@@ -168,6 +169,8 @@ namespace AdvancedClock
             {
                 _enableAdvanceReminder = value;
                 OnPropertyChanged(nameof(EnableAdvanceReminder));
+                OnPropertyChanged(nameof(AdvanceReminderText));
+                OnPropertyChanged(nameof(AdvanceStartTimeText));
             }
         }
 
@@ -181,6 +184,8 @@ namespace AdvancedClock
             {
                 _advanceMinutes = Math.Max(1, Math.Min(60, value)); // 限制在1-60分钟之间
                 OnPropertyChanged(nameof(AdvanceMinutes));
+                OnPropertyChanged(nameof(AdvanceReminderText));
+                OnPropertyChanged(nameof(AdvanceStartTimeText));
             }
         }
 
@@ -194,6 +199,7 @@ namespace AdvancedClock
             {
                 _repeatIntervalMinutes = Math.Max(1, Math.Min(10, value)); // 限制在1-10分钟之间
                 OnPropertyChanged(nameof(RepeatIntervalMinutes));
+                OnPropertyChanged(nameof(AdvanceReminderText));
             }
         }
 
@@ -217,6 +223,35 @@ namespace AdvancedClock
                     AlarmRepeatMode.Yearly => "每年",
                     _ => "未知"
                 };
+            }
+        }
+
+        /// <summary>
+        /// 提前提醒显示文本（用于UI）
+        /// </summary>
+        public string AdvanceReminderText
+        {
+            get
+            {
+                if (!_enableAdvanceReminder)
+                    return "未启用";
+
+                return $"提前{_advanceMinutes}分钟\n每{_repeatIntervalMinutes}分钟重复";
+            }
+        }
+
+        /// <summary>
+        /// 提前提醒开始时间显示文本（用于UI）
+        /// </summary>
+        public string AdvanceStartTimeText
+        {
+            get
+            {
+                if (!_enableAdvanceReminder)
+                    return "-";
+
+                var startTime = GetAdvanceReminderStartTime();
+                return startTime?.ToString("HH:mm:ss") ?? "-";
             }
         }
 
@@ -293,11 +328,21 @@ namespace AdvancedClock
             if (currentTime < startTime.Value || currentTime >= _alarmTime)
                 return false;
 
-            // 计算从开始时间到现在经过的分钟数
-            var elapsedMinutes = (currentTime - startTime.Value).TotalMinutes;
+            // 计算从开始时间到现在经过的总毫秒数（高精度）
+            var elapsedMilliseconds = (currentTime - startTime.Value).TotalMilliseconds;
+            var intervalMilliseconds = _repeatIntervalMinutes * 60.0 * 1000.0;
             
-            // 检查是否到了下一个提醒间隔点
-            return elapsedMinutes % _repeatIntervalMinutes < 1.0 / 60.0; // 精确到秒
+            // 检查是否到了下一个提醒间隔点（允许100毫秒的误差，因为检查频率更高）
+            var remainder = elapsedMilliseconds % intervalMilliseconds;
+            bool shouldTrigger = remainder < 100.0;
+            
+            // 调试输出
+            if (shouldTrigger)
+            {
+                System.Diagnostics.Debug.WriteLine($"提前提醒检查 - {_name}: 开始时间={startTime:HH:mm:ss.fff}, 当前时间={currentTime:HH:mm:ss.fff}, 经过毫秒={elapsedMilliseconds:F1}, 间隔毫秒={intervalMilliseconds}, 余数={remainder:F1}");
+            }
+            
+            return shouldTrigger;
         }
 
         protected void OnPropertyChanged(string propertyName)

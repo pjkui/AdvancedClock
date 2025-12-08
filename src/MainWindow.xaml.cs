@@ -65,6 +65,9 @@ namespace AdvancedClock
 
             // 初始化当前时间显示
             UpdateCurrentTime();
+            
+            // 显示时钟精度信息
+            UpdateClockPrecisionInfo();
 
             // 更新开机启动状态显示
             UpdateStartupStatus();
@@ -178,7 +181,17 @@ namespace AdvancedClock
         /// </summary>
         private void UpdateCurrentTime()
         {
-            CurrentTimeText.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss dddd");
+            var now = HighPrecisionClock.Now;
+            CurrentTimeText.Text = now.ToString("yyyy-MM-dd HH:mm:ss.fff dddd");
+        }
+
+        /// <summary>
+        /// 更新时钟精度信息显示
+        /// </summary>
+        private void UpdateClockPrecisionInfo()
+        {
+            var precisionInfo = HighPrecisionClock.GetPrecisionInfo();
+            ClockPrecisionText.Text = precisionInfo.ToString();
         }
 
         /// <summary>
