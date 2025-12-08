@@ -15,6 +15,7 @@ namespace AdvancedClock
         private readonly ObservableCollection<AlarmModel> _alarms;
 
         public event EventHandler<AlarmModel>? AlarmTriggered;
+        public event EventHandler<(AlarmModel Alarm, bool IsAdvanceReminder)>? AlarmReminderTriggered;
 
         public AlarmService(ObservableCollection<AlarmModel> alarms)
         {
@@ -68,11 +69,19 @@ namespace AdvancedClock
             // 检查所有启用的闹钟
             foreach (var alarm in _alarms.Where(a => a.IsEnabled).ToList())
             {
+                // 检查提前提醒
+                if (alarm.ShouldTriggerAdvanceReminder(now))
+                {
+                    // 触发提前提醒
+                    OnAlarmReminderTriggered(alarm, true);
+                }
+
                 // 检查是否到达闹钟时间（精确到秒）
                 if (Math.Abs((alarm.AlarmTime - now).TotalSeconds) < 1)
                 {
-                    // 触发闹钟
+                    // 触发正式闹钟
                     OnAlarmTriggered(alarm);
+                    OnAlarmReminderTriggered(alarm, false);
 
                     // 根据循环模式处理
                     if (alarm.RepeatMode == AlarmRepeatMode.None)
@@ -95,6 +104,16 @@ namespace AdvancedClock
         private void OnAlarmTriggered(AlarmModel alarm)
         {
             AlarmTriggered?.Invoke(this, alarm);
+        }
+
+        /// <summary>
+        /// 触发闹钟提醒事件
+        /// </summary>
+        /// <param name="alarm">闹钟对象</param>
+        /// <param name="isAdvanceReminder">是否为提前提醒</param>
+        private void OnAlarmReminderTriggered(AlarmModel alarm, bool isAdvanceReminder)
+        {
+            AlarmReminderTriggered?.Invoke(this, (alarm, isAdvanceReminder));
         }
     }
 }

@@ -14,7 +14,7 @@ namespace AdvancedClock
         /// <summary>
         /// 原始数据的副本，用于检测修改
         /// </summary>
-        private AlarmModel _originalData;
+        private AlarmModel _originalData = null!;
 
         /// <summary>
         /// 构造函数（新建模式）
@@ -58,6 +58,10 @@ namespace AdvancedClock
             HourTextBox.Text = AlarmModel.AlarmTime.Hour.ToString("D2");
             MinuteTextBox.Text = AlarmModel.AlarmTime.Minute.ToString("D2");
             SecondTextBox.Text = AlarmModel.AlarmTime.Second.ToString("D2");
+            
+            // 初始化提前提醒输入框
+            AdvanceMinutesTextBox.Text = AlarmModel.AdvanceMinutes.ToString();
+            RepeatIntervalTextBox.Text = AlarmModel.RepeatIntervalMinutes.ToString();
         }
 
         /// <summary>
@@ -73,7 +77,10 @@ namespace AdvancedClock
                 RepeatMode = AlarmModel.RepeatMode,
                 IsEnabled = AlarmModel.IsEnabled,
                 Message = AlarmModel.Message,
-                IsStrongAlert = AlarmModel.IsStrongAlert
+                IsStrongAlert = AlarmModel.IsStrongAlert,
+                EnableAdvanceReminder = AlarmModel.EnableAdvanceReminder,
+                AdvanceMinutes = AlarmModel.AdvanceMinutes,
+                RepeatIntervalMinutes = AlarmModel.RepeatIntervalMinutes
             };
         }
 
@@ -88,12 +95,21 @@ namespace AdvancedClock
                 return true;
             }
 
+            // 检查提前提醒输入框是否有变化
+            if (HasAdvanceReminderInputChanged())
+            {
+                return true;
+            }
+
             return _originalData.Name != AlarmModel.Name ||
                    _originalData.AlarmTime != AlarmModel.AlarmTime ||
                    _originalData.RepeatMode != AlarmModel.RepeatMode ||
                    _originalData.IsEnabled != AlarmModel.IsEnabled ||
                    _originalData.Message != AlarmModel.Message ||
-                   _originalData.IsStrongAlert != AlarmModel.IsStrongAlert;
+                   _originalData.IsStrongAlert != AlarmModel.IsStrongAlert ||
+                   _originalData.EnableAdvanceReminder != AlarmModel.EnableAdvanceReminder ||
+                   _originalData.AdvanceMinutes != AlarmModel.AdvanceMinutes ||
+                   _originalData.RepeatIntervalMinutes != AlarmModel.RepeatIntervalMinutes;
         }
 
         /// <summary>
@@ -117,6 +133,21 @@ namespace AdvancedClock
         }
 
         /// <summary>
+        /// 检查提前提醒输入框是否有变化（不修改数据）
+        /// </summary>
+        private bool HasAdvanceReminderInputChanged()
+        {
+            string currentAdvanceMinutes = AdvanceMinutesTextBox.Text;
+            string currentRepeatInterval = RepeatIntervalTextBox.Text;
+
+            string originalAdvanceMinutes = _originalData.AdvanceMinutes.ToString();
+            string originalRepeatInterval = _originalData.RepeatIntervalMinutes.ToString();
+
+            return currentAdvanceMinutes != originalAdvanceMinutes ||
+                   currentRepeatInterval != originalRepeatInterval;
+        }
+
+        /// <summary>
         /// 恢复到编辑前的状态
         /// </summary>
         private void RestoreOriginalData()
@@ -129,11 +160,18 @@ namespace AdvancedClock
             AlarmModel.IsEnabled = _originalData.IsEnabled;
             AlarmModel.Message = _originalData.Message;
             AlarmModel.IsStrongAlert = _originalData.IsStrongAlert;
+            AlarmModel.EnableAdvanceReminder = _originalData.EnableAdvanceReminder;
+            AlarmModel.AdvanceMinutes = _originalData.AdvanceMinutes;
+            AlarmModel.RepeatIntervalMinutes = _originalData.RepeatIntervalMinutes;
 
             // 恢复时间输入框显示
             HourTextBox.Text = _originalData.AlarmTime.Hour.ToString("D2");
             MinuteTextBox.Text = _originalData.AlarmTime.Minute.ToString("D2");
             SecondTextBox.Text = _originalData.AlarmTime.Second.ToString("D2");
+            
+            // 恢复提前提醒输入框显示
+            AdvanceMinutesTextBox.Text = _originalData.AdvanceMinutes.ToString();
+            RepeatIntervalTextBox.Text = _originalData.RepeatIntervalMinutes.ToString();
         }
 
         /// <summary>
@@ -214,6 +252,12 @@ namespace AdvancedClock
 
             // 验证并更新时间
             if (!ValidateAndUpdateTime())
+            {
+                return false;
+            }
+
+            // 验证并更新提前提醒设置
+            if (!ValidateAndUpdateAdvanceReminder())
             {
                 return false;
             }
@@ -316,6 +360,40 @@ namespace AdvancedClock
                 MessageBox.Show($"时间设置错误：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 验证并更新提前提醒设置
+        /// </summary>
+        private bool ValidateAndUpdateAdvanceReminder()
+        {
+            // 如果未启用提前提醒，跳过验证
+            if (!AlarmModel.EnableAdvanceReminder)
+            {
+                return true;
+            }
+
+            // 验证提前分钟数
+            if (!int.TryParse(AdvanceMinutesTextBox.Text, out int advanceMinutes) || advanceMinutes < 1 || advanceMinutes > 60)
+            {
+                MessageBox.Show("提前分钟数必须是1-60之间的数字！", "输入错误", MessageBoxButton.OK, MessageBoxImage.Warning);
+                AdvanceMinutesTextBox.Focus();
+                return false;
+            }
+
+            // 验证重复间隔分钟数
+            if (!int.TryParse(RepeatIntervalTextBox.Text, out int repeatInterval) || repeatInterval < 1 || repeatInterval > 10)
+            {
+                MessageBox.Show("重复间隔分钟数必须是1-10之间的数字！", "输入错误", MessageBoxButton.OK, MessageBoxImage.Warning);
+                RepeatIntervalTextBox.Focus();
+                return false;
+            }
+
+            // 更新提前提醒设置
+            AlarmModel.AdvanceMinutes = advanceMinutes;
+            AlarmModel.RepeatIntervalMinutes = repeatInterval;
+
+            return true;
         }
     }
 }

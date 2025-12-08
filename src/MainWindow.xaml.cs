@@ -52,6 +52,7 @@ namespace AdvancedClock
             // 初始化闹钟服务
             _alarmService = new AlarmService(_alarms);
             _alarmService.AlarmTriggered += AlarmService_AlarmTriggered;
+            _alarmService.AlarmReminderTriggered += AlarmService_AlarmReminderTriggered;
             _alarmService.Start();
 
             // 初始化时钟显示定时器
@@ -101,19 +102,22 @@ namespace AdvancedClock
         /// </summary>
         private void AddSampleAlarms()
         {
-            // 示例1：5分钟后的一次性闹钟
+            // 示例1：5分钟后的一次性闹钟（带提前提醒）
             var testAlarm = new AlarmModel
             {
                 Name = "测试闹钟",
                 AlarmTime = DateTime.Now.AddMinutes(5),
                 RepeatMode = AlarmRepeatMode.None,
                 Message = "这是一个测试闹钟！",
-                IsEnabled = true
+                IsEnabled = true,
+                EnableAdvanceReminder = true,
+                AdvanceMinutes = 2,
+                RepeatIntervalMinutes = 1
             };
             testAlarm.PropertyChanged += Alarm_PropertyChanged;
             _alarms.Add(testAlarm);
 
-            // 示例2：每天早上8点的闹钟
+            // 示例2：每天早上8点的闹钟（带提前提醒）
             var dailyAlarm = DateTime.Today.AddHours(8);
             if (dailyAlarm <= DateTime.Now)
             {
@@ -125,7 +129,10 @@ namespace AdvancedClock
                 AlarmTime = dailyAlarm,
                 RepeatMode = AlarmRepeatMode.Daily,
                 Message = "早上好！新的一天开始了！",
-                IsEnabled = true
+                IsEnabled = true,
+                EnableAdvanceReminder = true,
+                AdvanceMinutes = 10,
+                RepeatIntervalMinutes = 5
             };
             dailyAlarmModel.PropertyChanged += Alarm_PropertyChanged;
             _alarms.Add(dailyAlarmModel);
@@ -305,6 +312,24 @@ namespace AdvancedClock
         }
 
         /// <summary>
+        /// 闹钟提醒事件处理（包括提前提醒和正式闹钟）
+        /// </summary>
+        private void AlarmService_AlarmReminderTriggered(object? sender, (AlarmModel Alarm, bool IsAdvanceReminder) args)
+        {
+            var (alarm, isAdvanceReminder) = args;
+            
+            if (isAdvanceReminder)
+            {
+                // 提前提醒：总是使用弱提醒方式
+                ShowAdvanceReminder(alarm);
+            }
+            else
+            {
+                // 正式闹钟：根据设置选择提醒方式（这里不需要处理，因为AlarmTriggered事件已经处理了）
+            }
+        }
+
+        /// <summary>
         /// 显示强提醒（全屏遮罩）
         /// </summary>
         private void ShowStrongAlert(AlarmModel alarm)
@@ -334,6 +359,32 @@ namespace AdvancedClock
                     _notifyIcon.BalloonTipText = $"{alarm.Message}\n\n触发时间：{DateTime.Now:HH:mm:ss}";
                     _notifyIcon.BalloonTipIcon = WinForms.ToolTipIcon.Info;
                     _notifyIcon.ShowBalloonTip(5000); // 显示5秒
+                }
+            });
+        }
+
+        /// <summary>
+        /// 显示提前提醒（任务栏通知）
+        /// </summary>
+        private void ShowAdvanceReminder(AlarmModel alarm)
+        {
+            // 播放轻柔的提示音
+            SystemSounds.Asterisk.Play();
+
+            // 在UI线程上显示任务栏通知
+            Dispatcher.Invoke(() =>
+            {
+                if (_notifyIcon != null)
+                {
+                    var remainingTime = alarm.AlarmTime - DateTime.Now;
+                    var remainingMinutes = Math.Max(0, (int)remainingTime.TotalMinutes);
+                    
+                    _notifyIcon.BalloonTipTitle = $"提前提醒 - {alarm.Name}";
+                    _notifyIcon.BalloonTipText = $"距离闹钟时间还有约 {remainingMinutes} 分钟\n\n" +
+                                               $"目标时间：{alarm.AlarmTime:HH:mm:ss}\n" +
+                                               $"提醒消息：{alarm.Message}";
+                    _notifyIcon.BalloonTipIcon = WinForms.ToolTipIcon.Warning;
+                    _notifyIcon.ShowBalloonTip(3000); // 显示3秒
                 }
             });
         }

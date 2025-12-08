@@ -75,9 +75,41 @@
             <CheckBox IsChecked="{Binding IsEnabled}" Content="启用此闹钟" 
                       FontSize="14" FontWeight="Bold" Margin="0,0,0,8"/>
             <CheckBox IsChecked="{Binding IsStrongAlert}" Content="强提醒（全屏遮罩）" 
-                      FontSize="14" Foreground="#FF5722"/>
+                      FontSize="14" Foreground="#FF5722" Margin="0,0,0,8"/>
             <TextBlock Text="  提示：强提醒会以全屏遮罩方式显示，弱提醒会在任务栏显示通知" 
-                       FontSize="11" Foreground="#666666" Margin="20,5,0,0" TextWrapping="Wrap"/>
+                       FontSize="11" Foreground="#666666" Margin="20,5,0,10" TextWrapping="Wrap"/>
+            
+            <!-- 提前提醒配置 -->
+            <CheckBox x:Name="EnableAdvanceReminderCheckBox" 
+                      IsChecked="{Binding EnableAdvanceReminder}" 
+                      Content="启用提前提醒" 
+                      FontSize="14" FontWeight="Bold" Margin="0,0,0,8"
+                      Foreground="#2196F3"/>
+            
+            <StackPanel x:Name="AdvanceReminderPanel" 
+                        IsEnabled="{Binding IsChecked, ElementName=EnableAdvanceReminderCheckBox}"
+                        Margin="20,0,0,0">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <TextBlock Text="提前" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox x:Name="AdvanceMinutesTextBox" 
+                             Text="{Binding AdvanceMinutes, UpdateSourceTrigger=PropertyChanged}" 
+                             Width="50" Height="25" TextAlignment="Center" 
+                             FontSize="12" Margin="0,0,5,0" MaxLength="2"/>
+                    <TextBlock Text="分钟开始提醒" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                    
+                    <TextBlock Text="每" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox x:Name="RepeatIntervalTextBox" 
+                             Text="{Binding RepeatIntervalMinutes, UpdateSourceTrigger=PropertyChanged}" 
+                             Width="50" Height="25" TextAlignment="Center" 
+                             FontSize="12" Margin="0,0,5,0" MaxLength="2"/>
+                    <TextBlock Text="分钟重复一次" VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <TextBlock Text="  示例：设置11:30闹钟，提前5分钟，每1分钟重复 → 从11:25开始每分钟提醒，到11:30结束" 
+                           FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                <TextBlock Text="  范围：提前时间1-60分钟，重复间隔1-10分钟" 
+                           FontSize="10" Foreground="#FF9800" Margin="0,2,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
         </StackPanel>
 
         <!-- 说明信息 -->
@@ -89,7 +121,8 @@
                     • 不循环：闹钟只触发一次后自动禁用<LineBreak/>
                     • 每天：每天在设定的时间触发<LineBreak/>
                     • 每月：每月在设定的日期和时间触发<LineBreak/>
-                    • 每年：每年在设定的月份、日期和时间触发
+                    • 每年：每年在设定的月份、日期和时间触发<LineBreak/>
+                    • 提前提醒：在目标时间前开始按间隔重复提醒，到达目标时间后结束
                 </TextBlock>
             </StackPanel>
         </Border>

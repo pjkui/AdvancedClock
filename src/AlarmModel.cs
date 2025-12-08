@@ -45,6 +45,9 @@ namespace AdvancedClock
         private bool _isEnabled;
         private string _message;
         private bool _isStrongAlert;
+        private bool _enableAdvanceReminder;
+        private int _advanceMinutes;
+        private int _repeatIntervalMinutes;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -57,6 +60,9 @@ namespace AdvancedClock
             _isEnabled = true;
             _message = "闹钟时间到！";
             _isStrongAlert = false;
+            _enableAdvanceReminder = false;
+            _advanceMinutes = 5;
+            _repeatIntervalMinutes = 1;
         }
 
         /// <summary>
@@ -153,6 +159,45 @@ namespace AdvancedClock
         }
 
         /// <summary>
+        /// 是否启用提前提醒
+        /// </summary>
+        public bool EnableAdvanceReminder
+        {
+            get => _enableAdvanceReminder;
+            set
+            {
+                _enableAdvanceReminder = value;
+                OnPropertyChanged(nameof(EnableAdvanceReminder));
+            }
+        }
+
+        /// <summary>
+        /// 提前提醒分钟数（在目标时间前X分钟开始提醒）
+        /// </summary>
+        public int AdvanceMinutes
+        {
+            get => _advanceMinutes;
+            set
+            {
+                _advanceMinutes = Math.Max(1, Math.Min(60, value)); // 限制在1-60分钟之间
+                OnPropertyChanged(nameof(AdvanceMinutes));
+            }
+        }
+
+        /// <summary>
+        /// 重复提醒间隔分钟数（每Y分钟重复提醒一次）
+        /// </summary>
+        public int RepeatIntervalMinutes
+        {
+            get => _repeatIntervalMinutes;
+            set
+            {
+                _repeatIntervalMinutes = Math.Max(1, Math.Min(10, value)); // 限制在1-10分钟之间
+                OnPropertyChanged(nameof(RepeatIntervalMinutes));
+            }
+        }
+
+        /// <summary>
         /// 显示时间（用于UI）
         /// </summary>
         public string DisplayTime => _alarmTime.ToString("yyyy-MM-dd HH:mm:ss");
@@ -216,6 +261,43 @@ namespace AdvancedClock
             }
 
             return nextTime;
+        }
+
+        /// <summary>
+        /// 获取提前提醒开始时间
+        /// </summary>
+        /// <returns>提前提醒开始时间，如果未启用提前提醒则返回null</returns>
+        public DateTime? GetAdvanceReminderStartTime()
+        {
+            if (!_enableAdvanceReminder)
+                return null;
+
+            return _alarmTime.AddMinutes(-_advanceMinutes);
+        }
+
+        /// <summary>
+        /// 检查指定时间是否应该触发提前提醒
+        /// </summary>
+        /// <param name="currentTime">当前时间</param>
+        /// <returns>是否应该触发提前提醒</returns>
+        public bool ShouldTriggerAdvanceReminder(DateTime currentTime)
+        {
+            if (!_enableAdvanceReminder)
+                return false;
+
+            var startTime = GetAdvanceReminderStartTime();
+            if (!startTime.HasValue)
+                return false;
+
+            // 检查是否在提前提醒时间范围内
+            if (currentTime < startTime.Value || currentTime >= _alarmTime)
+                return false;
+
+            // 计算从开始时间到现在经过的分钟数
+            var elapsedMinutes = (currentTime - startTime.Value).TotalMinutes;
+            
+            // 检查是否到了下一个提醒间隔点
+            return elapsedMinutes % _repeatIntervalMinutes < 1.0 / 60.0; // 精确到秒
         }
 
         protected void OnPropertyChanged(string propertyName)
