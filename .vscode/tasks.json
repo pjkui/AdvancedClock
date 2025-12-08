@@ -1,469 +1,461 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        // === 构建任务 ===
-        {
-            "label": "build-debug",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/AdvancedClock.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary",
-                "--configuration",
-                "Debug",
-                "--verbosity",
-                "minimal"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "reveal": "silent",
-                "panel": "shared"
-            },
-            "problemMatcher": "$msCompile",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "build-release",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/AdvancedClock.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary",
-                "--configuration",
-                "Release",
-                "--verbosity",
-                "minimal"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared"
-            },
-            "problemMatcher": "$msCompile",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        // === 清理和还原任务 ===
-        {
-            "label": "clean",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "clean",
-                "${workspaceFolder}/AdvancedClock.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "silent",
-                "panel": "shared",
-                "showReuseMessage": false,
-                "clear": true
-            },
-            "problemMatcher": "$msCompile",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "restore",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "restore",
-                "${workspaceFolder}/AdvancedClock.sln",
-                "--verbosity",
-                "minimal"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "silent",
-                "panel": "shared",
-                "showReuseMessage": false,
-                "clear": true
-            },
-            "problemMatcher": [],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "clean-restore-build",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "clean",
-                "restore",
-                "build-debug"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared"
-            }
-        },
-        // === 调试任务 ===
-        {
-            "label": "run-with-debug",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "run",
-                "--project",
-                "${workspaceFolder}/AdvancedClock.csproj",
-                "--configuration",
-                "Debug",
-                "--verbosity",
-                "detailed"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new",
-                "focus": true,
-                "showReuseMessage": false
-            },
-            "problemMatcher": "$msCompile",
-            "dependsOn": "build-debug",
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "env": {
-                    "DOTNET_ENVIRONMENT": "Development"
-                }
-            }
-        },
-        // === 运行任务 ===
-        {
-            "label": "run-app",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "run",
-                "--project",
-                "${workspaceFolder}/AdvancedClock.csproj",
-                "--configuration",
-                "Debug"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new",
-                "focus": true
-            },
-            "problemMatcher": "$msCompile",
-            "dependsOn": "build-debug",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "run-app-release",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "run",
-                "--project",
-                "${workspaceFolder}/AdvancedClock.csproj",
-                "--configuration",
-                "Release"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new",
-                "focus": true
-            },
-            "problemMatcher": "$msCompile",
-            "dependsOn": "build-release",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        // === 发布任务 ===
-        {
-            "label": "publish-debug",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/AdvancedClock.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary",
-                "--configuration",
-                "Debug",
-                "--output",
-                "${workspaceFolder}/publish/Debug",
-                "--self-contained",
-                "false"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": "$msCompile",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "publish-release",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/AdvancedClock.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary",
-                "--configuration",
-                "Release",
-                "--output",
-                "${workspaceFolder}/publish/Release",
-                "--self-contained",
-                "false"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": "$msCompile",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "publish-standalone",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/AdvancedClock.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary",
-                "--configuration",
-                "Release",
-                "--output",
-                "${workspaceFolder}/publish/Standalone",
-                "--self-contained",
-                "true",
-                "--runtime",
-                "win-x64",
-                "/p:PublishSingleFile=true"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": "$msCompile",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        // === 开发工具任务 ===
-        {
-            "label": "watch",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "watch",
-                "run",
-                "--project",
-                "${workspaceFolder}/AdvancedClock.csproj"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": "$msCompile",
-            "isBackground": true,
-            "runOptions": {
-                "instanceLimit": 1
-            },
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "format-code",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "format",
-                "${workspaceFolder}/AdvancedClock.csproj",
-                "--verbosity",
-                "normal"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared"
-            },
-            "problemMatcher": [],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        // === 项目信息任务 ===
-        {
-            "label": "check-project-status",
-            "command": "cmd",
-            "type": "process",
-            "args": [
-                "/c",
-                "${workspaceFolder}/scripts/check-status.cmd"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new",
-                "showReuseMessage": false,
-                "clear": true
-            },
-            "problemMatcher": [],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "test-application",
-            "command": "cmd",
-            "type": "process",
-            "args": [
-                "/c",
-                "${workspaceFolder}/scripts/test-app.cmd"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new",
-                "showReuseMessage": false,
-                "clear": true
-            },
-            "problemMatcher": [],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "check-resources",
-            "command": "cmd",
-            "type": "process",
-            "args": [
-                "/c",
-                "${workspaceFolder}/scripts/check-resources.cmd"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new",
-                "showReuseMessage": false,
-                "clear": true
-            },
-            "problemMatcher": [],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "check-status",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "restore",
-                "${workspaceFolder}/AdvancedClock.sln",
-                "--verbosity",
-                "minimal",
-                "--no-build"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared",
-                "showReuseMessage": false,
-                "clear": true,
-                "close": true
-            },
-            "problemMatcher": [],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "show-info",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "--info"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": [],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "list-packages",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "list",
-                "${workspaceFolder}/AdvancedClock.csproj",
-                "package"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": [],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        // === 快捷任务 ===
-        {
-            "label": "quick-run",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "build-debug",
-                "run-app"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared"
-            }
-        },
-        {
-            "label": "full-rebuild",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "clean",
-                "restore",
-                "build-release"
-            ],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared"
-            }
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-debug",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/AdvancedClock.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "--configuration",
+        "Debug",
+        "--verbosity",
+        "minimal"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "build-release",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/AdvancedClock.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "--configuration",
+        "Release",
+        "--verbosity",
+        "minimal"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "clean",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "clean",
+        "${workspaceFolder}/AdvancedClock.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "restore",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "restore",
+        "${workspaceFolder}/AdvancedClock.sln",
+        "--verbosity",
+        "minimal"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "clean-restore-build",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "clean",
+        "restore",
+        "build-debug"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "run-with-debug",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/AdvancedClock.csproj",
+        "--configuration",
+        "Debug",
+        "--verbosity",
+        "detailed"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "focus": true,
+        "showReuseMessage": false
+      },
+      "problemMatcher": "$msCompile",
+      "dependsOn": "build-debug",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "DOTNET_ENVIRONMENT": "Development"
         }
-    ]
+      }
+    },
+    {
+      "label": "run-app",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/AdvancedClock.csproj",
+        "--configuration",
+        "Debug"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "focus": true
+      },
+      "problemMatcher": "$msCompile",
+      "dependsOn": "build-debug",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "run-app-release",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/AdvancedClock.csproj",
+        "--configuration",
+        "Release"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "focus": true
+      },
+      "problemMatcher": "$msCompile",
+      "dependsOn": "build-release",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "publish-debug",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "publish",
+        "${workspaceFolder}/AdvancedClock.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "--configuration",
+        "Debug",
+        "--output",
+        "${workspaceFolder}/publish/Debug",
+        "--self-contained",
+        "false"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "publish-release",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "publish",
+        "${workspaceFolder}/AdvancedClock.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "--configuration",
+        "Release",
+        "--output",
+        "${workspaceFolder}/publish/Release",
+        "--self-contained",
+        "false"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "publish-standalone",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "publish",
+        "${workspaceFolder}/AdvancedClock.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "--configuration",
+        "Release",
+        "--output",
+        "${workspaceFolder}/publish/Standalone",
+        "--self-contained",
+        "true",
+        "--runtime",
+        "win-x64",
+        "/p:PublishSingleFile=true"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "watch",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/AdvancedClock.csproj"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": "$msCompile",
+      "isBackground": true,
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "format-code",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "format",
+        "${workspaceFolder}/AdvancedClock.csproj",
+        "--verbosity",
+        "normal"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "check-project-status",
+      "command": "cmd",
+      "type": "process",
+      "args": [
+        "/c",
+        "${workspaceFolder}/scripts/check-status.cmd"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "test-application",
+      "command": "cmd",
+      "type": "process",
+      "args": [
+        "/c",
+        "${workspaceFolder}/scripts/test-app.cmd"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "check-resources",
+      "command": "cmd",
+      "type": "process",
+      "args": [
+        "/c",
+        "${workspaceFolder}/scripts/check-resources.cmd"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "check-status",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "restore",
+        "${workspaceFolder}/AdvancedClock.sln",
+        "--verbosity",
+        "minimal",
+        "--no-build"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true,
+        "close": true
+      },
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "show-info",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "--info"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "list-packages",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "list",
+        "${workspaceFolder}/AdvancedClock.csproj",
+        "package"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "quick-run",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "build-debug",
+        "run-app"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "full-rebuild",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "clean",
+        "restore",
+        "build-release"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
 }

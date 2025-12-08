@@ -52,11 +52,12 @@
         <StackPanel Grid.Row="2" Margin="0,0,0,15">
             <TextBlock Text="循环模式：" FontWeight="Bold" Margin="0,0,0,5"/>
             <ComboBox x:Name="RepeatModeComboBox" Height="30" FontSize="14"
-                      SelectedIndex="{Binding RepeatMode, Mode=TwoWay}">
-                <ComboBoxItem Content="不循环（一次性）"/>
-                <ComboBoxItem Content="每天"/>
-                <ComboBoxItem Content="每月"/>
-                <ComboBoxItem Content="每年"/>
+                      SelectedValue="{Binding RepeatMode, Mode=TwoWay}"
+                      SelectedValuePath="Tag">
+                <ComboBoxItem Content="不循环（一次性）" Tag="{x:Static local:AlarmRepeatMode.None}"/>
+                <ComboBoxItem Content="每天" Tag="{x:Static local:AlarmRepeatMode.Daily}"/>
+                <ComboBoxItem Content="每月" Tag="{x:Static local:AlarmRepeatMode.Monthly}"/>
+                <ComboBoxItem Content="每年" Tag="{x:Static local:AlarmRepeatMode.Yearly}"/>
             </ComboBox>
         </StackPanel>
 
