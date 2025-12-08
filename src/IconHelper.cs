@@ -20,21 +20,37 @@ namespace AdvancedClock
             {
                 // 尝试从程序集中获取图标
                 var assembly = Assembly.GetExecutingAssembly();
-                var iconStream = assembly.GetManifestResourceStream("AdvancedClock.icon.ico");
                 
-                if (iconStream != null)
+                // 尝试多种可能的资源名称
+                string[] possibleNames = {
+                    "AdvancedClock.icon.ico",
+                    "icon.ico",
+                    "AdvancedClock.Resources.icon.ico"
+                };
+                
+                foreach (var resourceName in possibleNames)
                 {
-                    return new Icon(iconStream);
+                    var iconStream = assembly.GetManifestResourceStream(resourceName);
+                    if (iconStream != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"成功从资源加载图标: {resourceName}");
+                        return new Icon(iconStream);
+                    }
                 }
+                
+                // 调试：列出所有嵌入资源
+                var resourceNames = assembly.GetManifestResourceNames();
+                System.Diagnostics.Debug.WriteLine($"可用的嵌入资源: {string.Join(", ", resourceNames)}");
                 
                 // 尝试从文件系统获取图标
                 var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico");
                 if (File.Exists(iconPath))
                 {
+                    System.Diagnostics.Debug.WriteLine($"从文件系统加载图标: {iconPath}");
                     return new Icon(iconPath);
                 }
                 
-                // 如果都没有找到，返回null
+                System.Diagnostics.Debug.WriteLine("未找到任何图标文件");
                 return null;
             }
             catch (Exception ex)

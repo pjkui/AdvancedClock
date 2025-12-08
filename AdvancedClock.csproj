@@ -9,6 +9,7 @@
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <EnableDefaultPageItems>false</EnableDefaultPageItems>
         <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+        <ApplicationIcon>icon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,6 +20,7 @@
         <Compile Include="src\**\*.cs" />
         <Page Include="src\**\*.xaml" Exclude="src\App.xaml" />
         <ApplicationDefinition Include="src\App.xaml" />
+        <EmbeddedResource Include="icon.ico" />
     </ItemGroup>
 
 </Project>
