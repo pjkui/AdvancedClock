@@ -346,6 +346,205 @@ namespace AdvancedClock
         {
             OnPropertyChanged(nameof(CountdownText));
             OnPropertyChanged(nameof(CountdownColor));
+            OnPropertyChanged(nameof(AdvanceReminderCountdownText));
+            OnPropertyChanged(nameof(AdvanceReminderCountdownColor));
+        }
+
+        /// <summary>
+        /// 提前提醒倒计时显示文本（用于UI）
+        /// </summary>
+        public string AdvanceReminderCountdownText
+        {
+            get
+            {
+                // 如果闹钟未启用，返回 -
+                if (!_isEnabled)
+                    return "-";
+
+                // 如果未启用提前提醒，返回未启用
+                if (!_enableAdvanceReminder)
+                    return "未启用";
+
+                var now = DateTime.Now;
+                var advanceStartTime = GetAdvanceReminderStartTime();
+
+                // 如果无法获取提前提醒开始时间
+                if (!advanceStartTime.HasValue)
+                    return "-";
+
+                // 如果闹钟时间已过
+                if (now >= _alarmTime)
+                {
+                    if (_repeatMode == AlarmRepeatMode.None)
+                    {
+                        return "已过期";
+                    }
+                    else
+                    {
+                        return "需更新";
+                    }
+                }
+
+                var timeSpanToStart = advanceStartTime.Value - now;
+
+                // 如果还未到提前提醒开始时间，显示距离开始的倒计时
+                if (timeSpanToStart.TotalSeconds >= 0)
+                {
+                    return FormatTimeSpan(timeSpanToStart);
+                }
+
+                // 已经进入提醒期间，计算并显示距离下一次间隔提醒的倒计时
+                var elapsedSinceStart = (now - advanceStartTime.Value).TotalSeconds;
+                var intervalSeconds = _repeatIntervalMinutes * 60.0;
+                
+                // 计算已经触发了多少次提醒
+                var completedIntervals = Math.Floor(elapsedSinceStart / intervalSeconds);
+                
+                // 计算下一次提醒的时间
+                var nextReminderTime = advanceStartTime.Value.AddSeconds((completedIntervals + 1) * intervalSeconds);
+                
+                // 如果下一次提醒时间已经超过闹钟时间，显示"最后阶段"
+                if (nextReminderTime >= _alarmTime)
+                {
+                    var timeToAlarm = _alarmTime - now;
+                    if (timeToAlarm.TotalSeconds <= 0)
+                    {
+                        return "即将触发";
+                    }
+                    return $"最后 {FormatTimeSpan(timeToAlarm)}";
+                }
+                
+                // 计算距离下一次间隔提醒的倒计时
+                var timeToNextReminder = nextReminderTime - now;
+                
+                // 如果倒计时很短（小于1秒），表示即将提醒
+                if (timeToNextReminder.TotalSeconds < 1)
+                {
+                    return "即将提醒";
+                }
+                
+                return FormatTimeSpan(timeToNextReminder);
+            }
+        }
+
+        /// <summary>
+        /// 格式化时间间隔显示
+        /// </summary>
+        private string FormatTimeSpan(TimeSpan timeSpan)
+        {
+            if (timeSpan.TotalSeconds < 60)
+            {
+                // 小于1分钟，显示秒数
+                return $"{(int)timeSpan.TotalSeconds}秒";
+            }
+            else if (timeSpan.TotalHours < 1)
+            {
+                // 小于1小时，显示分:秒
+                return $"{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
+            }
+            else if (timeSpan.TotalDays < 1)
+            {
+                // 小于1天，显示时:分:秒
+                return $"{(int)timeSpan.TotalHours:D2}:{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
+            }
+            else
+            {
+                // 超过1天，显示天数+时:分:秒
+                return $"{(int)timeSpan.TotalDays}天 {timeSpan.Hours:D2}:{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
+            }
+        }
+
+        /// <summary>
+        /// 提前提醒倒计时颜色（用于UI视觉提示）
+        /// </summary>
+        public string AdvanceReminderCountdownColor
+        {
+            get
+            {
+                if (!_isEnabled)
+                    return "#999999"; // 灰色 - 未启用
+
+                if (!_enableAdvanceReminder)
+                    return "#CCCCCC"; // 浅灰色 - 未启用提前提醒
+
+                var now = DateTime.Now;
+                var advanceStartTime = GetAdvanceReminderStartTime();
+
+                if (!advanceStartTime.HasValue)
+                    return "#999999";
+
+                // 如果闹钟时间已过
+                if (now >= _alarmTime)
+                {
+                    return "#F44336"; // 红色 - 已过期
+                }
+
+                var timeSpanToStart = advanceStartTime.Value - now;
+
+                // 如果还未到提前提醒开始时间，根据距离开始的时间决定颜色
+                if (timeSpanToStart.TotalSeconds >= 0)
+                {
+                    if (timeSpanToStart.TotalSeconds < 60)
+                    {
+                        return "#FF5722"; // 深橙色 - 即将开始（1分钟内）
+                    }
+                    else if (timeSpanToStart.TotalMinutes < 5)
+                    {
+                        return "#FF9800"; // 橙色 - 临近（5分钟内）
+                    }
+                    else if (timeSpanToStart.TotalMinutes < 15)
+                    {
+                        return "#FFC107"; // 琥珀色 - 较近（15分钟内）
+                    }
+                    else if (timeSpanToStart.TotalMinutes < 30)
+                    {
+                        return "#8BC34A"; // 浅绿色 - 适中（30分钟内）
+                    }
+                    else
+                    {
+                        return "#4CAF50"; // 绿色 - 充足
+                    }
+                }
+
+                // 已经进入提醒期间，计算距离下一次间隔提醒的倒计时
+                var elapsedSinceStart = (now - advanceStartTime.Value).TotalSeconds;
+                var intervalSeconds = _repeatIntervalMinutes * 60.0;
+                var completedIntervals = Math.Floor(elapsedSinceStart / intervalSeconds);
+                var nextReminderTime = advanceStartTime.Value.AddSeconds((completedIntervals + 1) * intervalSeconds);
+                
+                // 如果下一次提醒时间已经超过闹钟时间，使用紫色表示最后阶段
+                if (nextReminderTime >= _alarmTime)
+                {
+                    var timeToAlarm = _alarmTime - now;
+                    if (timeToAlarm.TotalSeconds < 30)
+                    {
+                        return "#E91E63"; // 深粉色 - 最后30秒
+                    }
+                    return "#9C27B0"; // 紫色 - 最后阶段
+                }
+                
+                var timeToNextReminder = nextReminderTime - now;
+                
+                // 根据距离下一次间隔提醒的时间决定颜色
+                var percentageOfInterval = timeToNextReminder.TotalSeconds / intervalSeconds;
+                
+                if (percentageOfInterval < 0.1) // 最后10%
+                {
+                    return "#FF5722"; // 深橙色 - 即将提醒
+                }
+                else if (percentageOfInterval < 0.3) // 最后30%
+                {
+                    return "#FF9800"; // 橙色 - 临近提醒
+                }
+                else if (percentageOfInterval < 0.5) // 中间
+                {
+                    return "#FFC107"; // 琥珀色 - 适中
+                }
+                else
+                {
+                    return "#2196F3"; // 蓝色 - 提醒期间（刚提醒过）
+                }
+            }
         }
 
         /// <summary>

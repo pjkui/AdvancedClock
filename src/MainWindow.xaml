@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AdvancedClock"
         mc:Ignorable="d"
-        Title="高级定时闹钟" Height="600" Width="1220"
+        Title="高级定时闹钟" Height="600" Width="1350"
         WindowStartupLocation="CenterScreen">
     
     <Window.Resources>
@@ -67,6 +67,18 @@
                                                FontWeight="Bold"
                                                FontSize="13"
                                                Foreground="{Binding CountdownColor, Converter={StaticResource StringToColorConverter}}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="提前提醒倒计时" Width="130">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding AdvanceReminderCountdownText}" 
+                                               HorizontalAlignment="Center"
+                                               FontFamily="Consolas"
+                                               FontWeight="Bold"
+                                               FontSize="12"
+                                               Foreground="{Binding AdvanceReminderCountdownColor, Converter={StaticResource StringToColorConverter}}"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
