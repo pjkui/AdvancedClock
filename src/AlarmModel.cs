@@ -256,6 +256,99 @@ namespace AdvancedClock
         }
 
         /// <summary>
+        /// 倒计时显示文本（用于UI）
+        /// </summary>
+        public string CountdownText
+        {
+            get
+            {
+                if (!_isEnabled)
+                    return "-";
+
+                var now = DateTime.Now;
+                var timeSpan = _alarmTime - now;
+
+                if (timeSpan.TotalSeconds < 0)
+                {
+                    // 已过期
+                    if (_repeatMode == AlarmRepeatMode.None)
+                    {
+                        return "已过期";
+                    }
+                    else
+                    {
+                        return "需更新";
+                    }
+                }
+                else if (timeSpan.TotalSeconds < 60)
+                {
+                    // 小于1分钟，显示秒数
+                    return $"{(int)timeSpan.TotalSeconds}秒";
+                }
+                else if (timeSpan.TotalHours < 1)
+                {
+                    // 小于1小时，显示分:秒
+                    return $"{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
+                }
+                else if (timeSpan.TotalDays < 1)
+                {
+                    // 小于1天，显示时:分:秒
+                    return $"{(int)timeSpan.TotalHours:D2}:{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
+                }
+                else
+                {
+                    // 超过1天，显示天数+时:分:秒
+                    return $"{(int)timeSpan.TotalDays}天 {timeSpan.Hours:D2}:{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
+                }
+            }
+        }
+
+        /// <summary>
+        /// 倒计时文本颜色（用于UI视觉提示）
+        /// </summary>
+        public string CountdownColor
+        {
+            get
+            {
+                if (!_isEnabled)
+                    return "#999999"; // 灰色
+
+                var now = DateTime.Now;
+                var timeSpan = _alarmTime - now;
+
+                if (timeSpan.TotalSeconds < 0)
+                {
+                    return "#F44336"; // 红色 - 已过期
+                }
+                else if (timeSpan.TotalSeconds < 60)
+                {
+                    return "#FF5722"; // 深橙色 - 即将触发（1分钟内）
+                }
+                else if (timeSpan.TotalMinutes < 5)
+                {
+                    return "#FF9800"; // 橙色 - 临近（5分钟内）
+                }
+                else if (timeSpan.TotalMinutes < 30)
+                {
+                    return "#FFC107"; // 琥珀色 - 较近（30分钟内）
+                }
+                else
+                {
+                    return "#4CAF50"; // 绿色 - 正常
+                }
+            }
+        }
+
+        /// <summary>
+        /// 更新倒计时显示（用于定时刷新）
+        /// </summary>
+        public void UpdateCountdown()
+        {
+            OnPropertyChanged(nameof(CountdownText));
+            OnPropertyChanged(nameof(CountdownColor));
+        }
+
+        /// <summary>
         /// 计算下一次闹钟时间
         /// </summary>
         /// <returns>下一次闹钟时间</returns>

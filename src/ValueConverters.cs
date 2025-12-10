@@ -44,4 +44,31 @@ namespace AdvancedClock
             throw new NotImplementedException();
         }
     }
+
+    /// <summary>
+    /// 十六进制颜色字符串到画刷的转换器
+    /// </summary>
+    public class StringToColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string colorString && !string.IsNullOrEmpty(colorString))
+            {
+                try
+                {
+                    return (SolidColorBrush)new BrushConverter().ConvertFrom(colorString)!;
+                }
+                catch
+                {
+                    return new SolidColorBrush(Colors.Black);
+                }
+            }
+            return new SolidColorBrush(Colors.Black);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

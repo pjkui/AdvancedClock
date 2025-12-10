@@ -200,6 +200,18 @@ namespace AdvancedClock
         private void ClockTimer_Tick(object? sender, EventArgs e)
         {
             UpdateCurrentTime();
+            UpdateAllCountdowns();
+        }
+
+        /// <summary>
+        /// 更新所有闹钟的倒计时显示
+        /// </summary>
+        private void UpdateAllCountdowns()
+        {
+            foreach (var alarm in _alarms)
+            {
+                alarm.UpdateCountdown();
+            }
         }
 
         /// <summary>
