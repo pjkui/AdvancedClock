@@ -1,6 +1,8 @@
 using System;
 using System.ComponentModel;
 using System.Windows;
+using Microsoft.Win32;
+using AdvancedClock.Actions;
 
 namespace AdvancedClock
 {
@@ -31,6 +33,9 @@ namespace AdvancedClock
 
             // 初始化时间输入框
             InitializeTimeInputs();
+            
+            // 初始化动作配置界面
+            UpdateActionParameterVisibility();
         }
 
         /// <summary>
@@ -48,6 +53,9 @@ namespace AdvancedClock
 
             // 初始化时间输入框
             InitializeTimeInputs();
+            
+            // 初始化动作配置界面
+            UpdateActionParameterVisibility();
         }
 
         /// <summary>
@@ -80,7 +88,10 @@ namespace AdvancedClock
                 IsStrongAlert = AlarmModel.IsStrongAlert,
                 EnableAdvanceReminder = AlarmModel.EnableAdvanceReminder,
                 AdvanceMinutes = AlarmModel.AdvanceMinutes,
-                RepeatIntervalMinutes = AlarmModel.RepeatIntervalMinutes
+                RepeatIntervalMinutes = AlarmModel.RepeatIntervalMinutes,
+                ActionType = AlarmModel.ActionType,
+                ActionParameter = AlarmModel.ActionParameter,
+                ActionTimeoutSeconds = AlarmModel.ActionTimeoutSeconds
             };
         }
 
@@ -109,7 +120,10 @@ namespace AdvancedClock
                    _originalData.IsStrongAlert != AlarmModel.IsStrongAlert ||
                    _originalData.EnableAdvanceReminder != AlarmModel.EnableAdvanceReminder ||
                    _originalData.AdvanceMinutes != AlarmModel.AdvanceMinutes ||
-                   _originalData.RepeatIntervalMinutes != AlarmModel.RepeatIntervalMinutes;
+                   _originalData.RepeatIntervalMinutes != AlarmModel.RepeatIntervalMinutes ||
+                   _originalData.ActionType != AlarmModel.ActionType ||
+                   _originalData.ActionParameter != AlarmModel.ActionParameter ||
+                   _originalData.ActionTimeoutSeconds != AlarmModel.ActionTimeoutSeconds;
         }
 
         /// <summary>
@@ -163,6 +177,9 @@ namespace AdvancedClock
             AlarmModel.EnableAdvanceReminder = _originalData.EnableAdvanceReminder;
             AlarmModel.AdvanceMinutes = _originalData.AdvanceMinutes;
             AlarmModel.RepeatIntervalMinutes = _originalData.RepeatIntervalMinutes;
+            AlarmModel.ActionType = _originalData.ActionType;
+            AlarmModel.ActionParameter = _originalData.ActionParameter;
+            AlarmModel.ActionTimeoutSeconds = _originalData.ActionTimeoutSeconds;
 
             // 恢复时间输入框显示
             HourTextBox.Text = _originalData.AlarmTime.Hour.ToString("D2");
@@ -258,6 +275,12 @@ namespace AdvancedClock
 
             // 验证并更新提前提醒设置
             if (!ValidateAndUpdateAdvanceReminder())
+            {
+                return false;
+            }
+
+            // 验证并更新动作配置
+            if (!ValidateActionConfiguration())
             {
                 return false;
             }
@@ -394,6 +417,162 @@ namespace AdvancedClock
             AlarmModel.RepeatIntervalMinutes = repeatInterval;
 
             return true;
+        }
+
+        /// <summary>
+        /// 验证动作配置
+        /// </summary>
+        private bool ValidateActionConfiguration()
+        {
+            // 如果动作类型为"仅提醒"，无需验证参数
+            if (AlarmModel.ActionType == AlarmActionType.None)
+            {
+                return true;
+            }
+
+            // 验证超时设置
+            if (!int.TryParse(TimeoutTextBox.Text, out int timeout) || timeout < 5 || timeout > 300)
+            {
+                MessageBox.Show("执行超时必须是5-300秒之间的数字！", "输入错误", MessageBoxButton.OK, MessageBoxImage.Warning);
+                TimeoutTextBox.Focus();
+                return false;
+            }
+            AlarmModel.ActionTimeoutSeconds = timeout;
+
+            // 根据动作类型验证参数
+            ActionExecutor? executor = AlarmModel.ActionType switch
+            {
+                AlarmActionType.OpenUrl => new UrlActionExecutor(),
+                AlarmActionType.ExecuteCommand => new CommandActionExecutor(),
+                AlarmActionType.RunPythonScript => new PythonScriptActionExecutor(),
+                _ => null
+            };
+
+            if (executor != null)
+            {
+                var validationError = executor.ValidateParameter(AlarmModel.ActionParameter);
+                if (validationError != null)
+                {
+                    MessageBox.Show($"动作参数验证失败：\n{validationError}", "输入错误", 
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 动作类型改变事件
+        /// </summary>
+        private void ActionType_Changed(object sender, RoutedEventArgs e)
+        {
+            UpdateActionParameterVisibility();
+        }
+
+        /// <summary>
+        /// 更新动作参数输入面板的可见性
+        /// </summary>
+        private void UpdateActionParameterVisibility()
+        {
+            // 隐藏所有输入面板
+            UrlInputPanel.Visibility = Visibility.Collapsed;
+            CommandInputPanel.Visibility = Visibility.Collapsed;
+            PythonInputPanel.Visibility = Visibility.Collapsed;
+
+            // 根据动作类型显示相应的输入面板
+            if (AlarmModel.ActionType != AlarmActionType.None)
+            {
+                ActionParameterPanel.Visibility = Visibility.Visible;
+
+                switch (AlarmModel.ActionType)
+                {
+                    case AlarmActionType.OpenUrl:
+                        UrlInputPanel.Visibility = Visibility.Visible;
+                        break;
+                    case AlarmActionType.ExecuteCommand:
+                        CommandInputPanel.Visibility = Visibility.Visible;
+                        break;
+                    case AlarmActionType.RunPythonScript:
+                        PythonInputPanel.Visibility = Visibility.Visible;
+                        break;
+                }
+            }
+            else
+            {
+                ActionParameterPanel.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
+        /// 测试动作按钮点击
+        /// </summary>
+        private async void TestAction_Click(object sender, RoutedEventArgs e)
+        {
+            if (AlarmModel.ActionType == AlarmActionType.None)
+            {
+                return;
+            }
+
+            // 验证参数
+            if (!ValidateActionConfiguration())
+            {
+                return;
+            }
+
+            try
+            {
+                ActionExecutor? executor = AlarmModel.ActionType switch
+                {
+                    AlarmActionType.OpenUrl => new UrlActionExecutor(),
+                    AlarmActionType.ExecuteCommand => new CommandActionExecutor(),
+                    AlarmActionType.RunPythonScript => new PythonScriptActionExecutor(),
+                    _ => null
+                };
+
+                if (executor != null)
+                {
+                    MessageBox.Show("正在执行动作，请稍候...", "测试中", MessageBoxButton.OK, MessageBoxImage.Information);
+                    
+                    var result = await executor.ExecuteAsync(AlarmModel.ActionParameter, AlarmModel.ActionTimeoutSeconds);
+                    
+                    if (result.Success)
+                    {
+                        MessageBox.Show($"动作执行成功！\n\n{result.Message}", "测试成功", 
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"动作执行失败！\n\n{result.Message}\n\n错误详情：\n{result.ErrorDetails}", 
+                            "测试失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"测试过程中发生异常：\n{ex.Message}", "错误", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 浏览Python脚本按钮点击
+        /// </summary>
+        private void BrowsePython_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "选择Python脚本文件",
+                Filter = "Python文件 (*.py)|*.py|所有文件 (*.*)|*.*",
+                FilterIndex = 1,
+                Multiselect = false
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                AlarmModel.ActionParameter = openFileDialog.FileName;
+                PythonScriptTextBox.Text = openFileDialog.FileName;
+            }
         }
     }
 }

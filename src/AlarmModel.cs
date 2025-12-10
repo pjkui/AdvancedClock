@@ -34,6 +34,36 @@ namespace AdvancedClock
     }
 
     /// <summary>
+    /// 闹钟动作类型枚举
+    /// </summary>
+    public enum AlarmActionType
+    {
+        /// <summary>
+        /// 仅提醒（不执行额外动作）
+        /// </summary>
+        [Description("仅提醒")]
+        None,
+        
+        /// <summary>
+        /// 打开网址
+        /// </summary>
+        [Description("打开网址")]
+        OpenUrl,
+        
+        /// <summary>
+        /// 执行系统命令
+        /// </summary>
+        [Description("执行命令")]
+        ExecuteCommand,
+        
+        /// <summary>
+        /// 运行Python脚本
+        /// </summary>
+        [Description("运行Python脚本")]
+        RunPythonScript
+    }
+
+    /// <summary>
     /// 闹钟数据模型
     /// </summary>
     public class AlarmModel : INotifyPropertyChanged
@@ -48,6 +78,9 @@ namespace AdvancedClock
         private bool _enableAdvanceReminder;
         private int _advanceMinutes;
         private int _repeatIntervalMinutes;
+        private AlarmActionType _actionType;
+        private string _actionParameter;
+        private int _actionTimeoutSeconds;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -63,6 +96,9 @@ namespace AdvancedClock
             _enableAdvanceReminder = false;
             _advanceMinutes = 5;
             _repeatIntervalMinutes = 1;
+            _actionType = AlarmActionType.None;
+            _actionParameter = string.Empty;
+            _actionTimeoutSeconds = 30;
         }
 
         /// <summary>
@@ -204,6 +240,46 @@ namespace AdvancedClock
         }
 
         /// <summary>
+        /// 闹钟触发时执行的动作类型
+        /// </summary>
+        public AlarmActionType ActionType
+        {
+            get => _actionType;
+            set
+            {
+                _actionType = value;
+                OnPropertyChanged(nameof(ActionType));
+                OnPropertyChanged(nameof(ActionTypeText));
+            }
+        }
+
+        /// <summary>
+        /// 动作参数（URL、命令或脚本路径）
+        /// </summary>
+        public string ActionParameter
+        {
+            get => _actionParameter;
+            set
+            {
+                _actionParameter = value ?? string.Empty;
+                OnPropertyChanged(nameof(ActionParameter));
+            }
+        }
+
+        /// <summary>
+        /// 动作执行超时时间（秒）
+        /// </summary>
+        public int ActionTimeoutSeconds
+        {
+            get => _actionTimeoutSeconds;
+            set
+            {
+                _actionTimeoutSeconds = Math.Max(5, Math.Min(300, value)); // 限制在5-300秒之间
+                OnPropertyChanged(nameof(ActionTimeoutSeconds));
+            }
+        }
+
+        /// <summary>
         /// 显示时间（用于UI）
         /// </summary>
         public string DisplayTime => _alarmTime.ToString("yyyy-MM-dd HH:mm:ss");
@@ -221,6 +297,24 @@ namespace AdvancedClock
                     AlarmRepeatMode.Daily => "每天",
                     AlarmRepeatMode.Monthly => "每月",
                     AlarmRepeatMode.Yearly => "每年",
+                    _ => "未知"
+                };
+            }
+        }
+
+        /// <summary>
+        /// 动作类型文本（用于UI）
+        /// </summary>
+        public string ActionTypeText
+        {
+            get
+            {
+                return _actionType switch
+                {
+                    AlarmActionType.None => "仅提醒",
+                    AlarmActionType.OpenUrl => "打开网址",
+                    AlarmActionType.ExecuteCommand => "执行命令",
+                    AlarmActionType.RunPythonScript => "运行Python",
                     _ => "未知"
                 };
             }

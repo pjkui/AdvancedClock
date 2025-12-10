@@ -112,6 +112,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
+                        <GridViewColumn Header="动作" Width="100" DisplayMemberBinding="{Binding ActionTypeText}"/>
                         <GridViewColumn Header="消息" Width="140" DisplayMemberBinding="{Binding Message}"/>
                     </GridView>
                 </ListView.View>
@@ -139,6 +140,9 @@
                 <Button x:Name="TestAlarmButton" Content="测试闹钟" Width="100" Height="35" 
                         Margin="5" Click="TestAlarmButton_Click" IsEnabled="False"
                         Background="#FF9800" Foreground="White" FontWeight="Bold"/>
+                <Button x:Name="ViewLogsButton" Content="📋 查看日志" Width="100" Height="35" 
+                        Margin="5" Click="ViewLogsButton_Click"
+                        Background="#673AB7" Foreground="White" FontWeight="Bold"/>
             </StackPanel>
 
             <!-- 设置区域 -->

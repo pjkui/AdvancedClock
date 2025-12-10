@@ -7,6 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Media;
 using WinForms = System.Windows.Forms;
+using AdvancedClock.Actions;
+using AdvancedClock.Services;
 
 namespace AdvancedClock
 {
@@ -21,6 +23,7 @@ namespace AdvancedClock
         private readonly AlarmDataService _dataService;
         private readonly StartupService _startupService;
         private readonly AppSettings _appSettings;
+        private readonly LogService _logService;
         private WinForms.NotifyIcon? _notifyIcon;
         private bool _isReallyClosing = false;
 
@@ -38,6 +41,9 @@ namespace AdvancedClock
             _dataService = new AlarmDataService();
             _startupService = new StartupService();
             _appSettings = new AppSettings();
+            _logService = LogService.Instance;
+
+            // 记录应用启动
 
             // 初始化闹钟集合
             _alarms = new ObservableCollection<AlarmModel>();
@@ -323,6 +329,15 @@ namespace AdvancedClock
         /// </summary>
         private void AlarmService_AlarmTriggered(object? sender, AlarmModel alarm)
         {
+            // 记录闹钟触发
+            _logService.LogAlarmTriggered(alarm.Name, DateTime.Now);
+
+            // 执行配置的动作
+            if (alarm.ActionType != AlarmActionType.None)
+            {
+                ExecuteAlarmAction(alarm);
+            }
+
             // 根据强提醒设置选择不同的提醒方式
             if (alarm.IsStrongAlert)
             {
@@ -412,6 +427,73 @@ namespace AdvancedClock
                     _notifyIcon.ShowBalloonTip(3000); // 显示3秒
                 }
             });
+        }
+
+        /// <summary>
+        /// 执行闹钟配置的动作
+        /// </summary>
+        private async void ExecuteAlarmAction(AlarmModel alarm)
+        {
+            try
+            {
+                ActionExecutor? executor = alarm.ActionType switch
+                {
+                    AlarmActionType.OpenUrl => new UrlActionExecutor(),
+                    AlarmActionType.ExecuteCommand => new CommandActionExecutor(),
+                    AlarmActionType.RunPythonScript => new PythonScriptActionExecutor(),
+                    _ => null
+                };
+
+                if (executor != null)
+                {
+                    _logService.LogInfo($"开始执行动作", 
+                        $"闹钟: {alarm.Name}, 动作类型: {alarm.ActionTypeText}, 参数: {alarm.ActionParameter}");
+
+                    var result = await executor.ExecuteAsync(alarm.ActionParameter, alarm.ActionTimeoutSeconds);
+
+                    // 记录执行结果
+                    _logService.LogActionExecution(
+                        alarm.Name,
+                        alarm.ActionTypeText,
+                        alarm.ActionParameter,
+                        result.Success,
+                        result.Message,
+                        result.ErrorDetails,
+                        result.Duration
+                    );
+
+                    // 如果执行失败，在UI线程显示错误提示
+                    if (!result.Success)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            MessageBox.Show(
+                                $"闹钟动作执行失败！\n\n" +
+                                $"闹钟：{alarm.Name}\n" +
+                                $"动作：{alarm.ActionTypeText}\n" +
+                                $"参数：{alarm.ActionParameter}\n\n" +
+                                $"错误信息：\n{result.ErrorDetails}",
+                                "动作执行失败",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError("动作执行异常", 
+                    $"闹钟: {alarm.Name}, 动作类型: {alarm.ActionTypeText}", ex);
+
+                Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(
+                        $"执行闹钟动作时发生异常！\n\n{ex.Message}",
+                        "错误",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                });
+            }
         }
 
         /// <summary>
@@ -622,6 +704,27 @@ namespace AdvancedClock
         }
 
         /// <summary>
+        /// 查看日志按钮点击
+        /// </summary>
+        private void ViewLogsButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 打开日志目录
+                string logDirectory = _logService.LogDirectory;
+                System.Diagnostics.Process.Start("explorer.exe", logDirectory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"打开日志目录失败：{ex.Message}",
+                    "错误",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
         /// 窗口关闭事件（处理最小化到托盘）
         /// </summary>
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -658,6 +761,9 @@ namespace AdvancedClock
             // 停止服务
             _alarmService.Stop();
             _clockTimer.Stop();
+            
+            // 关闭日志服务
+            _logService.Close();
             
             // 清理任务栏图标
             if (_notifyIcon != null)
