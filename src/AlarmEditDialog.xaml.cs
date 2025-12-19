@@ -33,7 +33,7 @@ namespace AdvancedClock
 
             // 初始化时间输入框
             InitializeTimeInputs();
-            
+
             // 初始化动作配置界面
             UpdateActionParameterVisibility();
         }
@@ -53,7 +53,7 @@ namespace AdvancedClock
 
             // 初始化时间输入框
             InitializeTimeInputs();
-            
+
             // 初始化动作配置界面
             UpdateActionParameterVisibility();
         }
@@ -66,7 +66,7 @@ namespace AdvancedClock
             HourTextBox.Text = AlarmModel.AlarmTime.Hour.ToString("D2");
             MinuteTextBox.Text = AlarmModel.AlarmTime.Minute.ToString("D2");
             SecondTextBox.Text = AlarmModel.AlarmTime.Second.ToString("D2");
-            
+
             // 初始化提前提醒输入框
             AdvanceMinutesTextBox.Text = AlarmModel.AdvanceMinutes.ToString();
             RepeatIntervalTextBox.Text = AlarmModel.RepeatIntervalMinutes.ToString();
@@ -185,7 +185,7 @@ namespace AdvancedClock
             HourTextBox.Text = _originalData.AlarmTime.Hour.ToString("D2");
             MinuteTextBox.Text = _originalData.AlarmTime.Minute.ToString("D2");
             SecondTextBox.Text = _originalData.AlarmTime.Second.ToString("D2");
-            
+
             // 恢复提前提醒输入框显示
             AdvanceMinutesTextBox.Text = _originalData.AdvanceMinutes.ToString();
             RepeatIntervalTextBox.Text = _originalData.RepeatIntervalMinutes.ToString();
@@ -285,18 +285,45 @@ namespace AdvancedClock
                 return false;
             }
 
-            // 检查时间是否在过去（仅对不循环的闹钟）
-            if (AlarmModel.RepeatMode == AlarmRepeatMode.None && AlarmModel.AlarmTime <= DateTime.Now)
+            // 检查时间是否在过去
+            if (AlarmModel.AlarmTime <= DateTime.Now)
             {
-                var result = MessageBox.Show(
-                    "设置的时间已经过去，闹钟将不会触发。是否继续保存？",
-                    "时间提醒",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
-
-                if (result == MessageBoxResult.No)
+                if (AlarmModel.RepeatMode == AlarmRepeatMode.None)
                 {
-                    return false;
+                    // 不循环的闹钟，提示用户
+                    var result = MessageBox.Show(
+                        "设置的时间已经过去，闹钟将不会触发。是否继续保存？",
+                        "时间提醒",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+
+                    if (result == MessageBoxResult.No)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    // 循环闹钟，自动调整到下一个有效时间
+                    var nextTime = AlarmModel.GetNextAlarmTime();
+                    if (nextTime != AlarmModel.AlarmTime)
+                    {
+                        AlarmModel.AlarmTime = nextTime;
+
+                        string repeatModeText = AlarmModel.RepeatMode switch
+                        {
+                            AlarmRepeatMode.Daily => "每天",
+                            AlarmRepeatMode.Monthly => "每月",
+                            AlarmRepeatMode.Yearly => "每年",
+                            _ => "循环"
+                        };
+
+                        MessageBox.Show(
+                            $"设置的时间已经过去，已自动调整到下次{repeatModeText}的时间：\n{nextTime:yyyy-MM-dd HH:mm:ss}",
+                            "时间已调整",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
                 }
             }
 
@@ -453,7 +480,7 @@ namespace AdvancedClock
                 var validationError = executor.ValidateParameter(AlarmModel.ActionParameter);
                 if (validationError != null)
                 {
-                    MessageBox.Show($"动作参数验证失败：\n{validationError}", "输入错误", 
+                    MessageBox.Show($"动作参数验证失败：\n{validationError}", "输入错误",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
                     return false;
                 }
@@ -533,24 +560,24 @@ namespace AdvancedClock
                 if (executor != null)
                 {
                     MessageBox.Show("正在执行动作，请稍候...", "测试中", MessageBoxButton.OK, MessageBoxImage.Information);
-                    
+
                     var result = await executor.ExecuteAsync(AlarmModel.ActionParameter, AlarmModel.ActionTimeoutSeconds);
-                    
+
                     if (result.Success)
                     {
-                        MessageBox.Show($"动作执行成功！\n\n{result.Message}", "测试成功", 
+                        MessageBox.Show($"动作执行成功！\n\n{result.Message}", "测试成功",
                             MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     else
                     {
-                        MessageBox.Show($"动作执行失败！\n\n{result.Message}\n\n错误详情：\n{result.ErrorDetails}", 
+                        MessageBox.Show($"动作执行失败！\n\n{result.Message}\n\n错误详情：\n{result.ErrorDetails}",
                             "测试失败", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"测试过程中发生异常：\n{ex.Message}", "错误", 
+                MessageBox.Show($"测试过程中发生异常：\n{ex.Message}", "错误",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

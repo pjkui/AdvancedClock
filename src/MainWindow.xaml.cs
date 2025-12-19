@@ -30,10 +30,10 @@ namespace AdvancedClock
         public MainWindow()
         {
             InitializeComponent();
-            
+
             // 设置窗口图标
             SetWindowIcon();
-            
+
             // 初始化任务栏通知图标
             InitializeNotifyIcon();
 
@@ -71,13 +71,13 @@ namespace AdvancedClock
 
             // 初始化当前时间显示
             UpdateCurrentTime();
-            
+
             // 显示时钟精度信息
             UpdateClockPrecisionInfo();
 
             // 更新开机启动状态显示
             UpdateStartupStatus();
-            
+
             // 更新托盘设置状态显示
             UpdateTraySettings();
         }
@@ -88,15 +88,44 @@ namespace AdvancedClock
         private void LoadAlarms()
         {
             var savedAlarms = _dataService.LoadAlarms();
-            
+
             if (savedAlarms.Count > 0)
             {
+                bool needsSave = false;
+
                 // 加载保存的闹钟
                 foreach (var alarm in savedAlarms)
-                {                    
+                {
+                    // 自动修复过期的循环闹钟
+                    if (alarm.IsEnabled && alarm.RepeatMode != AlarmRepeatMode.None && alarm.AlarmTime <= DateTime.Now)
+                    {
+                        var nextTime = alarm.GetNextAlarmTime();
+                        if (nextTime != alarm.AlarmTime)
+                        {
+                            alarm.AlarmTime = nextTime;
+                            needsSave = true;
+
+                            string repeatModeText = alarm.RepeatMode switch
+                            {
+                                AlarmRepeatMode.Daily => "每天",
+                                AlarmRepeatMode.Monthly => "每月",
+                                AlarmRepeatMode.Yearly => "每年",
+                                _ => "循环"
+                            };
+
+                            System.Diagnostics.Debug.WriteLine($"自动修复闹钟 '{alarm.Name}' 到下次{repeatModeText}时间: {nextTime:yyyy-MM-dd HH:mm:ss}");
+                        }
+                    }
+
                     // 为每个闹钟添加属性变化监听
                     alarm.PropertyChanged += Alarm_PropertyChanged;
                     _alarms.Add(alarm);
+                }
+
+                // 如果有修复，保存数据
+                if (needsSave)
+                {
+                    SaveAlarms();
                 }
             }
             else
@@ -269,42 +298,42 @@ namespace AdvancedClock
         {
             // 获取自定义图标，如果失败则使用系统默认图标
             var customIcon = IconHelper.GetApplicationIcon();
-            
+
             _notifyIcon = new WinForms.NotifyIcon
             {
                 Icon = customIcon ?? System.Drawing.SystemIcons.Information,
                 Visible = true,
                 Text = "高级闹钟"
             };
-            
+
             // 气泡提示点击事件
             _notifyIcon.BalloonTipClicked += (s, e) =>
             {
                 ShowMainWindow();
             };
-            
+
             // 双击托盘图标显示窗口
             _notifyIcon.DoubleClick += (s, e) =>
             {
                 ShowMainWindow();
             };
-            
+
             // 创建右键菜单
             var contextMenu = new WinForms.ContextMenuStrip();
-            
+
             var showMenuItem = new WinForms.ToolStripMenuItem("显示主窗口");
             showMenuItem.Click += (s, e) => ShowMainWindow();
             contextMenu.Items.Add(showMenuItem);
-            
+
             contextMenu.Items.Add(new WinForms.ToolStripSeparator());
-            
+
             var exitMenuItem = new WinForms.ToolStripMenuItem("退出程序");
             exitMenuItem.Click += (s, e) => ExitApplication();
             contextMenu.Items.Add(exitMenuItem);
-            
+
             _notifyIcon.ContextMenuStrip = contextMenu;
         }
-        
+
         /// <summary>
         /// 显示主窗口
         /// </summary>
@@ -314,7 +343,7 @@ namespace AdvancedClock
             this.WindowState = WindowState.Normal;
             this.Activate();
         }
-        
+
         /// <summary>
         /// 退出应用程序
         /// </summary>
@@ -357,7 +386,7 @@ namespace AdvancedClock
         private void AlarmService_AlarmReminderTriggered(object? sender, (AlarmModel Alarm, bool IsAdvanceReminder) args)
         {
             var (alarm, isAdvanceReminder) = args;
-            
+
             if (isAdvanceReminder)
             {
                 // 提前提醒：总是使用弱提醒方式
@@ -418,7 +447,7 @@ namespace AdvancedClock
                 {
                     var remainingTime = alarm.AlarmTime - DateTime.Now;
                     var remainingMinutes = Math.Max(0, (int)remainingTime.TotalMinutes);
-                    
+
                     _notifyIcon.BalloonTipTitle = $"提前提醒 - {alarm.Name}";
                     _notifyIcon.BalloonTipText = $"距离闹钟时间还有约 {remainingMinutes} 分钟\n\n" +
                                                $"目标时间：{alarm.AlarmTime:HH:mm:ss}\n" +
@@ -446,7 +475,7 @@ namespace AdvancedClock
 
                 if (executor != null)
                 {
-                    _logService.LogInfo($"开始执行动作", 
+                    _logService.LogInfo($"开始执行动作",
                         $"闹钟: {alarm.Name}, 动作类型: {alarm.ActionTypeText}, 参数: {alarm.ActionParameter}");
 
                     var result = await executor.ExecuteAsync(alarm.ActionParameter, alarm.ActionTimeoutSeconds);
@@ -482,7 +511,7 @@ namespace AdvancedClock
             }
             catch (Exception ex)
             {
-                _logService.LogError("动作执行异常", 
+                _logService.LogError("动作执行异常",
                     $"闹钟: {alarm.Name}, 动作类型: {alarm.ActionTypeText}", ex);
 
                 Dispatcher.Invoke(() =>
@@ -635,7 +664,7 @@ namespace AdvancedClock
             bool isEnabled = _startupService.IsStartupEnabled();
             StartupCheckBox.IsChecked = isEnabled;
         }
-        
+
         /// <summary>
         /// 更新托盘设置状态显示
         /// </summary>
@@ -652,7 +681,7 @@ namespace AdvancedClock
             if (StartupCheckBox.IsChecked.HasValue)
             {
                 bool success = _startupService.SetStartup(StartupCheckBox.IsChecked.Value);
-                
+
                 if (!success)
                 {
                     MessageBox.Show(
@@ -660,13 +689,13 @@ namespace AdvancedClock
                         "错误",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
-                    
+
                     // 恢复原状态
                     StartupCheckBox.IsChecked = _startupService.IsStartupEnabled();
                 }
             }
         }
-        
+
         /// <summary>
         /// 最小化到托盘复选框改变
         /// </summary>
@@ -687,7 +716,7 @@ namespace AdvancedClock
             {
                 string dataPath = _dataService.DataFilePath;
                 string? directory = System.IO.Path.GetDirectoryName(dataPath);
-                
+
                 if (!string.IsNullOrEmpty(directory))
                 {
                     System.Diagnostics.Process.Start("explorer.exe", directory);
@@ -730,13 +759,13 @@ namespace AdvancedClock
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             base.OnClosing(e);
-            
+
             // 如果不是真正关闭，且启用了托盘功能，则最小化到托盘
             if (!_isReallyClosing && _appSettings.MinimizeToTray)
             {
                 e.Cancel = true;
                 this.Hide();
-                
+
                 // 显示气泡提示
                 if (_notifyIcon != null)
                 {
@@ -747,24 +776,24 @@ namespace AdvancedClock
                 }
             }
         }
-        
+
         /// <summary>
         /// 窗口关闭时停止服务
         /// </summary>
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            
+
             // 保存数据
             SaveAlarms();
-            
+
             // 停止服务
             _alarmService.Stop();
             _clockTimer.Stop();
-            
+
             // 关闭日志服务
             _logService.Close();
-            
+
             // 清理任务栏图标
             if (_notifyIcon != null)
             {
