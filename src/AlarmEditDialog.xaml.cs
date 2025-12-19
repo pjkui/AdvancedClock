@@ -583,6 +583,81 @@ namespace AdvancedClock
         }
 
         /// <summary>
+        /// 浏览声音文件按钮点击
+        /// </summary>
+        private void BrowseSound_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "选择闹钟声音文件",
+                Filter = AudioService.GetSupportedFormats(),
+                FilterIndex = 1
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string filePath = openFileDialog.FileName;
+
+                // 验证文件是否有效
+                if (AudioService.Instance.IsValidAudioFile(filePath))
+                {
+                    AlarmModel.CustomSoundPath = filePath;
+                    MessageBox.Show($"已选择声音文件：\n{System.IO.Path.GetFileName(filePath)}",
+                        "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("选择的文件不是有效的音频文件！\n支持的格式：WAV, MP3, WMA, M4A",
+                        "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 试听声音按钮点击
+        /// </summary>
+        private void TestSound_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(AlarmModel.CustomSoundPath))
+                {
+                    // 播放系统默认声音
+                    AudioService.Instance.PlayAlarmSound(null, AlarmModel.IsStrongAlert);
+                    MessageBox.Show("正在播放系统默认声音", "试听",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else if (System.IO.File.Exists(AlarmModel.CustomSoundPath))
+                {
+                    // 播放自定义声音
+                    AudioService.Instance.PlayAlarmSound(AlarmModel.CustomSoundPath, AlarmModel.IsStrongAlert);
+                    MessageBox.Show($"正在播放：\n{System.IO.Path.GetFileName(AlarmModel.CustomSoundPath)}",
+                        "试听", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("声音文件不存在！\n请重新选择或清除后使用系统默认声音。",
+                        "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"播放声音失败：\n{ex.Message}", "错误",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 清除声音按钮点击
+        /// </summary>
+        private void ClearSound_Click(object sender, RoutedEventArgs e)
+        {
+            AlarmModel.CustomSoundPath = string.Empty;
+            MessageBox.Show("已清除自定义声音，将使用系统默认声音", "提示",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        /// <summary>
         /// 浏览Python脚本按钮点击
         /// </summary>
         private void BrowsePython_Click(object sender, RoutedEventArgs e)

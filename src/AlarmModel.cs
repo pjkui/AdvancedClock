@@ -13,19 +13,19 @@ namespace AdvancedClock
         /// </summary>
         [Description("不循环")]
         None,
-        
+
         /// <summary>
         /// 按天循环
         /// </summary>
         [Description("每天")]
         Daily,
-        
+
         /// <summary>
         /// 按月循环
         /// </summary>
         [Description("每月")]
         Monthly,
-        
+
         /// <summary>
         /// 按年循环
         /// </summary>
@@ -43,19 +43,19 @@ namespace AdvancedClock
         /// </summary>
         [Description("仅提醒")]
         None,
-        
+
         /// <summary>
         /// 打开网址
         /// </summary>
         [Description("打开网址")]
         OpenUrl,
-        
+
         /// <summary>
         /// 执行系统命令
         /// </summary>
         [Description("执行命令")]
         ExecuteCommand,
-        
+
         /// <summary>
         /// 运行Python脚本
         /// </summary>
@@ -81,6 +81,7 @@ namespace AdvancedClock
         private AlarmActionType _actionType;
         private string _actionParameter;
         private int _actionTimeoutSeconds;
+        private string _customSoundPath;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -99,6 +100,7 @@ namespace AdvancedClock
             _actionType = AlarmActionType.None;
             _actionParameter = string.Empty;
             _actionTimeoutSeconds = 30;
+            _customSoundPath = string.Empty;
         }
 
         /// <summary>
@@ -276,6 +278,34 @@ namespace AdvancedClock
             {
                 _actionTimeoutSeconds = Math.Max(5, Math.Min(300, value)); // 限制在5-300秒之间
                 OnPropertyChanged(nameof(ActionTimeoutSeconds));
+            }
+        }
+
+        /// <summary>
+        /// 自定义声音文件路径（支持 .wav, .mp3 等格式）
+        /// </summary>
+        public string CustomSoundPath
+        {
+            get => _customSoundPath;
+            set
+            {
+                _customSoundPath = value ?? string.Empty;
+                OnPropertyChanged(nameof(CustomSoundPath));
+                OnPropertyChanged(nameof(CustomSoundText));
+            }
+        }
+
+        /// <summary>
+        /// 自定义声音显示文本（用于UI）
+        /// </summary>
+        public string CustomSoundText
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(_customSoundPath))
+                    return "系统默认";
+
+                return System.IO.Path.GetFileName(_customSoundPath);
             }
         }
 
@@ -490,13 +520,13 @@ namespace AdvancedClock
                 // 已经进入提醒期间，计算并显示距离下一次间隔提醒的倒计时
                 var elapsedSinceStart = (now - advanceStartTime.Value).TotalSeconds;
                 var intervalSeconds = _repeatIntervalMinutes * 60.0;
-                
+
                 // 计算已经触发了多少次提醒
                 var completedIntervals = Math.Floor(elapsedSinceStart / intervalSeconds);
-                
+
                 // 计算下一次提醒的时间
                 var nextReminderTime = advanceStartTime.Value.AddSeconds((completedIntervals + 1) * intervalSeconds);
-                
+
                 // 如果下一次提醒时间已经超过闹钟时间，显示"最后阶段"
                 if (nextReminderTime >= _alarmTime)
                 {
@@ -507,16 +537,16 @@ namespace AdvancedClock
                     }
                     return $"最后 {FormatTimeSpan(timeToAlarm)}";
                 }
-                
+
                 // 计算距离下一次间隔提醒的倒计时
                 var timeToNextReminder = nextReminderTime - now;
-                
+
                 // 如果倒计时很短（小于1秒），表示即将提醒
                 if (timeToNextReminder.TotalSeconds < 1)
                 {
                     return "即将提醒";
                 }
-                
+
                 return FormatTimeSpan(timeToNextReminder);
             }
         }
@@ -605,7 +635,7 @@ namespace AdvancedClock
                 var intervalSeconds = _repeatIntervalMinutes * 60.0;
                 var completedIntervals = Math.Floor(elapsedSinceStart / intervalSeconds);
                 var nextReminderTime = advanceStartTime.Value.AddSeconds((completedIntervals + 1) * intervalSeconds);
-                
+
                 // 如果下一次提醒时间已经超过闹钟时间，使用紫色表示最后阶段
                 if (nextReminderTime >= _alarmTime)
                 {
@@ -616,12 +646,12 @@ namespace AdvancedClock
                     }
                     return "#9C27B0"; // 紫色 - 最后阶段
                 }
-                
+
                 var timeToNextReminder = nextReminderTime - now;
-                
+
                 // 根据距离下一次间隔提醒的时间决定颜色
                 var percentageOfInterval = timeToNextReminder.TotalSeconds / intervalSeconds;
-                
+
                 if (percentageOfInterval < 0.1) // 最后10%
                 {
                     return "#FF5722"; // 深橙色 - 即将提醒
@@ -717,17 +747,17 @@ namespace AdvancedClock
             // 计算从开始时间到现在经过的总毫秒数（高精度）
             var elapsedMilliseconds = (currentTime - startTime.Value).TotalMilliseconds;
             var intervalMilliseconds = _repeatIntervalMinutes * 60.0 * 1000.0;
-            
+
             // 检查是否到了下一个提醒间隔点（允许100毫秒的误差，因为检查频率更高）
             var remainder = elapsedMilliseconds % intervalMilliseconds;
             bool shouldTrigger = remainder < 100.0;
-            
+
             // 调试输出
             if (shouldTrigger)
             {
                 System.Diagnostics.Debug.WriteLine($"提前提醒检查 - {_name}: 开始时间={startTime:HH:mm:ss.fff}, 当前时间={currentTime:HH:mm:ss.fff}, 经过毫秒={elapsedMilliseconds:F1}, 间隔毫秒={intervalMilliseconds}, 余数={remainder:F1}");
             }
-            
+
             return shouldTrigger;
         }
 

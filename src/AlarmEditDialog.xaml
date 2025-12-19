@@ -11,9 +11,10 @@
     <Window.Resources>
         <local:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
     </Window.Resources>
-    
+
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -28,26 +29,26 @@
         <!-- 闹钟名称 -->
         <StackPanel Grid.Row="0" Margin="0,0,0,15">
             <TextBlock Text="闹钟名称：" FontWeight="Bold" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                      Height="30" FontSize="14" Padding="5"/>
         </StackPanel>
 
         <!-- 闹钟时间 -->
         <StackPanel Grid.Row="1" Margin="0,0,0,15">
             <TextBlock Text="闹钟时间：" FontWeight="Bold" Margin="0,0,0,5"/>
-            <DatePicker SelectedDate="{Binding AlarmTime, Mode=TwoWay}" 
+            <DatePicker SelectedDate="{Binding AlarmTime, Mode=TwoWay}"
                         Height="30" FontSize="14" Margin="0,0,0,5"/>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="时：" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <TextBox x:Name="HourTextBox" Width="50" Height="30" 
+                <TextBox x:Name="HourTextBox" Width="50" Height="30"
                          TextAlignment="Center" FontSize="14" Margin="0,0,10,0"
                          MaxLength="2"/>
                 <TextBlock Text="分：" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <TextBox x:Name="MinuteTextBox" Width="50" Height="30" 
+                <TextBox x:Name="MinuteTextBox" Width="50" Height="30"
                          TextAlignment="Center" FontSize="14" Margin="0,0,10,0"
                          MaxLength="2"/>
                 <TextBlock Text="秒：" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <TextBox x:Name="SecondTextBox" Width="50" Height="30" 
+                <TextBox x:Name="SecondTextBox" Width="50" Height="30"
                          TextAlignment="Center" FontSize="14"
                          MaxLength="2"/>
             </StackPanel>
@@ -69,71 +70,71 @@
         <!-- 闹钟消息 -->
         <StackPanel Grid.Row="3" Margin="0,0,0,15">
             <TextBlock Text="闹钟消息：" FontWeight="Bold" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" 
-                     Height="60" FontSize="14" Padding="5" 
-                     TextWrapping="Wrap" AcceptsReturn="True" 
+            <TextBox Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"
+                     Height="60" FontSize="14" Padding="5"
+                     TextWrapping="Wrap" AcceptsReturn="True"
                      VerticalScrollBarVisibility="Auto"/>
         </StackPanel>
 
         <!-- 启用状态和强提醒 -->
         <StackPanel Grid.Row="4" Margin="0,0,0,15">
-            <CheckBox IsChecked="{Binding IsEnabled}" Content="启用此闹钟" 
+            <CheckBox IsChecked="{Binding IsEnabled}" Content="启用此闹钟"
                       FontSize="14" FontWeight="Bold" Margin="0,0,0,8"/>
-            <CheckBox IsChecked="{Binding IsStrongAlert}" Content="强提醒（全屏遮罩）" 
+            <CheckBox IsChecked="{Binding IsStrongAlert}" Content="强提醒（全屏遮罩）"
                       FontSize="14" Foreground="#FF5722" Margin="0,0,0,8"/>
-            <TextBlock Text="  提示：强提醒会以全屏遮罩方式显示，弱提醒会在任务栏显示通知" 
+            <TextBlock Text="  提示：强提醒会以全屏遮罩方式显示，弱提醒会在任务栏显示通知"
                        FontSize="11" Foreground="#666666" Margin="20,5,0,10" TextWrapping="Wrap"/>
-            
+
             <!-- 提前提醒配置 -->
-            <CheckBox x:Name="EnableAdvanceReminderCheckBox" 
-                      IsChecked="{Binding EnableAdvanceReminder}" 
-                      Content="启用提前提醒" 
+            <CheckBox x:Name="EnableAdvanceReminderCheckBox"
+                      IsChecked="{Binding EnableAdvanceReminder}"
+                      Content="启用提前提醒"
                       FontSize="14" FontWeight="Bold" Margin="0,0,0,8"
                       Foreground="#2196F3"/>
-            
-            <StackPanel x:Name="AdvanceReminderPanel" 
+
+            <StackPanel x:Name="AdvanceReminderPanel"
                         IsEnabled="{Binding IsChecked, ElementName=EnableAdvanceReminderCheckBox}"
                         Margin="20,0,0,0">
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                     <TextBlock Text="提前" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    <TextBox x:Name="AdvanceMinutesTextBox" 
-                             Text="{Binding AdvanceMinutes, UpdateSourceTrigger=PropertyChanged}" 
-                             Width="50" Height="25" TextAlignment="Center" 
+                    <TextBox x:Name="AdvanceMinutesTextBox"
+                             Text="{Binding AdvanceMinutes, UpdateSourceTrigger=PropertyChanged}"
+                             Width="50" Height="25" TextAlignment="Center"
                              FontSize="12" Margin="0,0,5,0" MaxLength="2"/>
                     <TextBlock Text="分钟开始提醒" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                    
+
                     <TextBlock Text="每" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    <TextBox x:Name="RepeatIntervalTextBox" 
-                             Text="{Binding RepeatIntervalMinutes, UpdateSourceTrigger=PropertyChanged}" 
-                             Width="50" Height="25" TextAlignment="Center" 
+                    <TextBox x:Name="RepeatIntervalTextBox"
+                             Text="{Binding RepeatIntervalMinutes, UpdateSourceTrigger=PropertyChanged}"
+                             Width="50" Height="25" TextAlignment="Center"
                              FontSize="12" Margin="0,0,5,0" MaxLength="2"/>
                     <TextBlock Text="分钟重复一次" VerticalAlignment="Center"/>
                 </StackPanel>
-                
-                <TextBlock Text="  示例：设置11:30闹钟，提前5分钟，每1分钟重复 → 从11:25开始每分钟提醒，到11:30结束" 
+
+                <TextBlock Text="  示例：设置11:30闹钟，提前5分钟，每1分钟重复 → 从11:25开始每分钟提醒，到11:30结束"
                            FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextWrapping="Wrap"/>
-                <TextBlock Text="  范围：提前时间1-60分钟，重复间隔1-10分钟" 
+                <TextBlock Text="  范围：提前时间1-60分钟，重复间隔1-10分钟"
                            FontSize="10" Foreground="#FF9800" Margin="0,2,0,0" TextWrapping="Wrap"/>
             </StackPanel>
         </StackPanel>
 
         <!-- 动作配置区（新增） -->
-        <GroupBox Grid.Row="5" Header="⚙️ 触发时执行动作" FontWeight="Bold" FontSize="13" 
+        <GroupBox Grid.Row="5" Header="⚙️ 触发时执行动作" FontWeight="Bold" FontSize="13"
                   Margin="0,0,0,15" Padding="10" BorderBrush="#2196F3" BorderThickness="2">
             <StackPanel>
                 <!-- 动作类型选择 -->
                 <TextBlock Text="选择动作类型：" Margin="0,0,0,8" FontSize="12" FontWeight="Normal"/>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                    <RadioButton x:Name="ActionNoneRadio" Content="🔔 仅提醒" 
+                    <RadioButton x:Name="ActionNoneRadio" Content="🔔 仅提醒"
                                  IsChecked="{Binding ActionType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=None}"
                                  Margin="0,0,15,0" FontSize="12" Checked="ActionType_Changed"/>
-                    <RadioButton x:Name="ActionUrlRadio" Content="🌐 打开网址" 
+                    <RadioButton x:Name="ActionUrlRadio" Content="🌐 打开网址"
                                  IsChecked="{Binding ActionType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=OpenUrl}"
                                  Margin="0,0,15,0" FontSize="12" Checked="ActionType_Changed"/>
-                    <RadioButton x:Name="ActionCommandRadio" Content="⚙️ 执行命令" 
+                    <RadioButton x:Name="ActionCommandRadio" Content="⚙️ 执行命令"
                                  IsChecked="{Binding ActionType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=ExecuteCommand}"
                                  Margin="0,0,15,0" FontSize="12" Checked="ActionType_Changed"/>
-                    <RadioButton x:Name="ActionPythonRadio" Content="🐍 运行Python" 
+                    <RadioButton x:Name="ActionPythonRadio" Content="🐍 运行Python"
                                  IsChecked="{Binding ActionType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=RunPythonScript}"
                                  FontSize="12" Checked="ActionType_Changed"/>
                 </StackPanel>
@@ -148,27 +149,27 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="UrlTextBox" Grid.Column="0" Height="30" 
+                            <TextBox x:Name="UrlTextBox" Grid.Column="0" Height="30"
                                      Text="{Binding ActionParameter, UpdateSourceTrigger=PropertyChanged}"
                                      FontSize="12" Padding="5" Margin="0,0,5,0"/>
-                            <Button x:Name="TestUrlButton" Grid.Column="1" Content="测试" 
+                            <Button x:Name="TestUrlButton" Grid.Column="1" Content="测试"
                                     Width="60" Height="30" Click="TestAction_Click"
                                     Background="#0078D4" Foreground="White" FontSize="11"/>
                         </Grid>
-                        <TextBlock Text="  示例: https://www.baidu.com" 
+                        <TextBlock Text="  示例: https://www.baidu.com"
                                    FontSize="10" Foreground="#666" Margin="0,3,0,0"/>
                     </StackPanel>
 
                     <!-- 命令输入 -->
                     <StackPanel x:Name="CommandInputPanel" Visibility="Collapsed">
                         <TextBlock Text="系统命令：" Margin="0,0,0,5" FontSize="12"/>
-                        <TextBox x:Name="CommandTextBox" Height="60" 
+                        <TextBox x:Name="CommandTextBox" Height="60"
                                  Text="{Binding ActionParameter, UpdateSourceTrigger=PropertyChanged}"
                                  TextWrapping="Wrap" AcceptsReturn="True" FontFamily="Consolas"
                                  FontSize="11" Padding="5" VerticalScrollBarVisibility="Auto"/>
-                        <TextBlock Text="  示例: notepad.exe" 
+                        <TextBlock Text="  示例: notepad.exe"
                                    FontSize="10" Foreground="#666" Margin="0,3,0,0"/>
-                        <TextBlock Text="  警告: 请谨慎使用系统命令，避免危险操作" 
+                        <TextBlock Text="  警告: 请谨慎使用系统命令，避免危险操作"
                                    FontSize="10" Foreground="#FF5722" Margin="0,2,0,0"/>
                     </StackPanel>
 
@@ -180,34 +181,72 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="PythonScriptTextBox" Grid.Column="0" Height="30" 
+                            <TextBox x:Name="PythonScriptTextBox" Grid.Column="0" Height="30"
                                      Text="{Binding ActionParameter, UpdateSourceTrigger=PropertyChanged}"
                                      FontSize="11" Padding="5" Margin="0,0,5,0" IsReadOnly="True"/>
-                            <Button x:Name="BrowsePythonButton" Grid.Column="1" Content="浏览" 
+                            <Button x:Name="BrowsePythonButton" Grid.Column="1" Content="浏览"
                                     Width="60" Height="30" Click="BrowsePython_Click"
                                     Background="#0078D4" Foreground="White" FontSize="11"/>
                         </Grid>
-                        <TextBlock Text="  选择一个 .py 文件" 
+                        <TextBlock Text="  选择一个 .py 文件"
                                    FontSize="10" Foreground="#666" Margin="0,3,0,0"/>
                     </StackPanel>
                 </StackPanel>
 
                 <!-- 超时设置 -->
-                <StackPanel Orientation="Horizontal" Margin="0,10,0,0" 
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
                             Visibility="{Binding ElementName=ActionParameterPanel, Path=Visibility}">
                     <TextBlock Text="执行超时：" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="12"/>
                     <TextBox x:Name="TimeoutTextBox" Width="50" Height="25" TextAlignment="Center"
                              Text="{Binding ActionTimeoutSeconds, UpdateSourceTrigger=PropertyChanged}"
                              FontSize="12" Margin="0,0,5,0"/>
                     <TextBlock Text="秒" VerticalAlignment="Center" FontSize="12"/>
-                    <TextBlock Text="（范围：5-300秒）" VerticalAlignment="Center" 
+                    <TextBlock Text="（范围：5-300秒）" VerticalAlignment="Center"
                                FontSize="10" Foreground="#999" Margin="10,0,0,0"/>
                 </StackPanel>
             </StackPanel>
         </GroupBox>
 
+        <!-- 声音配置区（新增） -->
+        <GroupBox Grid.Row="6" Header="🔊 闹钟声音" FontWeight="Bold" FontSize="13"
+                  Margin="0,0,0,15" Padding="10" BorderBrush="#9C27B0" BorderThickness="2">
+            <StackPanel>
+                <TextBlock Text="选择闹钟提醒声音：" Margin="0,0,0,8" FontSize="12" FontWeight="Normal"/>
+
+                <!-- 声音文件选择 -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="SoundPathTextBox" Grid.Column="0" Height="30"
+                             Text="{Binding CustomSoundPath, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="12" Padding="5" Margin="0,0,5,0" IsReadOnly="True"
+                             Background="#F5F5F5"/>
+
+                    <Button x:Name="BrowseSoundButton" Grid.Column="1" Content="浏览..."
+                            Width="70" Height="30" Click="BrowseSound_Click"
+                            Background="#9C27B0" Foreground="White" FontSize="11" Margin="0,0,5,0"/>
+
+                    <Button x:Name="TestSoundButton" Grid.Column="2" Content="试听"
+                            Width="60" Height="30" Click="TestSound_Click"
+                            Background="#FF9800" Foreground="White" FontSize="11"/>
+                </Grid>
+
+                <TextBlock Text="  支持格式: WAV, MP3, WMA, M4A（留空使用系统默认声音）"
+                           FontSize="10" Foreground="#666" Margin="0,5,0,0"/>
+
+                <Button x:Name="ClearSoundButton" Content="清除（使用系统默认）"
+                        Width="150" Height="25" Click="ClearSound_Click"
+                        Background="#757575" Foreground="White" FontSize="10"
+                        Margin="0,8,0,0" HorizontalAlignment="Left"/>
+            </StackPanel>
+        </GroupBox>
+
         <!-- 说明信息 -->
-        <Border Grid.Row="6" Background="#FFF9E6" Padding="8" CornerRadius="5" 
+        <Border Grid.Row="7" Background="#FFF9E6" Padding="8" CornerRadius="5"
                 Margin="0,0,0,10" BorderBrush="#FFD700" BorderThickness="1">
             <StackPanel>
                 <TextBlock Text="循环模式说明：" FontWeight="Bold" Margin="0,0,0,3" FontSize="12"/>
@@ -222,7 +261,7 @@
         </Border>
 
         <!-- 按钮 -->
-        <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+        <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
             <Button Content="确定" Width="100" Height="35" Margin="0,0,10,0"
                     Click="OkButton_Click" IsDefault="True"
                     Background="#4CAF50" Foreground="White" FontWeight="Bold"

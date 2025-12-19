@@ -16,9 +16,9 @@ namespace AdvancedClock
         public StrongAlertWindow(AlarmModel alarm)
         {
             InitializeComponent();
-            
+
             _alarm = alarm;
-            
+
             // 设置闹钟信息
             AlarmNameText.Text = alarm.Name;
             AlarmMessageText.Text = alarm.Message;
@@ -32,8 +32,8 @@ namespace AdvancedClock
             _timer.Tick += Timer_Tick;
             _timer.Start();
 
-            // 播放系统提示音
-            SystemSounds.Exclamation.Play();
+            // 播放闹钟声音（自定义或系统默认）
+            AudioService.Instance.PlayAlarmSound(alarm.CustomSoundPath, alarm.IsStrongAlert);
 
             // 确保窗口在最前面
             this.Topmost = true;
