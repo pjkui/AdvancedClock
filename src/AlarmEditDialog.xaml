@@ -12,29 +12,26 @@
         <local:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
     </Window.Resources>
 
-    <Grid Margin="20">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- 闹钟名称 -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+        <!-- 可滚动内容区域 -->
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="20,20,20,10">
+            <StackPanel>
+                <!-- 闹钟名称 -->
+                <StackPanel Margin="0,0,0,15">
             <TextBlock Text="闹钟名称：" FontWeight="Bold" Margin="0,0,0,5"/>
             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                      Height="30" FontSize="14" Padding="5"/>
         </StackPanel>
 
-        <!-- 闹钟时间 -->
-        <StackPanel Grid.Row="1" Margin="0,0,0,15">
+                <!-- 闹钟时间 -->
+                <StackPanel Margin="0,0,0,15">
             <TextBlock Text="闹钟时间：" FontWeight="Bold" Margin="0,0,0,5"/>
             <DatePicker SelectedDate="{Binding AlarmTime, Mode=TwoWay}"
                         Height="30" FontSize="14" Margin="0,0,0,5"/>
@@ -54,8 +51,8 @@
             </StackPanel>
         </StackPanel>
 
-        <!-- 循环模式 -->
-        <StackPanel Grid.Row="2" Margin="0,0,0,15">
+                <!-- 循环模式 -->
+                <StackPanel Margin="0,0,0,15">
             <TextBlock Text="循环模式：" FontWeight="Bold" Margin="0,0,0,5"/>
             <ComboBox x:Name="RepeatModeComboBox" Height="30" FontSize="14"
                       SelectedValue="{Binding RepeatMode, Mode=TwoWay}"
@@ -67,8 +64,8 @@
             </ComboBox>
         </StackPanel>
 
-        <!-- 闹钟消息 -->
-        <StackPanel Grid.Row="3" Margin="0,0,0,15">
+                <!-- 闹钟消息 -->
+                <StackPanel Margin="0,0,0,15">
             <TextBlock Text="闹钟消息：" FontWeight="Bold" Margin="0,0,0,5"/>
             <TextBox Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"
                      Height="60" FontSize="14" Padding="5"
@@ -76,8 +73,8 @@
                      VerticalScrollBarVisibility="Auto"/>
         </StackPanel>
 
-        <!-- 启用状态和强提醒 -->
-        <StackPanel Grid.Row="4" Margin="0,0,0,15">
+                <!-- 启用状态和强提醒 -->
+                <StackPanel Margin="0,0,0,15">
             <CheckBox IsChecked="{Binding IsEnabled}" Content="启用此闹钟"
                       FontSize="14" FontWeight="Bold" Margin="0,0,0,8"/>
             <CheckBox IsChecked="{Binding IsStrongAlert}" Content="强提醒（全屏遮罩）"
@@ -118,8 +115,8 @@
             </StackPanel>
         </StackPanel>
 
-        <!-- 动作配置区（新增） -->
-        <GroupBox Grid.Row="5" Header="⚙️ 触发时执行动作" FontWeight="Bold" FontSize="13"
+                <!-- 动作配置区（新增） -->
+                <GroupBox Header="⚙️ 触发时执行动作" FontWeight="Bold" FontSize="13"
                   Margin="0,0,0,15" Padding="10" BorderBrush="#2196F3" BorderThickness="2">
             <StackPanel>
                 <!-- 动作类型选择 -->
@@ -207,8 +204,8 @@
             </StackPanel>
         </GroupBox>
 
-        <!-- 声音配置区（新增） -->
-        <GroupBox Grid.Row="6" Header="🔊 闹钟声音" FontWeight="Bold" FontSize="13"
+                <!-- 声音配置区（新增） -->
+                <GroupBox Header="🔊 闹钟声音" FontWeight="Bold" FontSize="13"
                   Margin="0,0,0,15" Padding="10" BorderBrush="#9C27B0" BorderThickness="2">
             <StackPanel>
                 <TextBlock Text="选择闹钟提醒声音：" Margin="0,0,0,8" FontSize="12" FontWeight="Normal"/>
@@ -245,8 +242,8 @@
             </StackPanel>
         </GroupBox>
 
-        <!-- 说明信息 -->
-        <Border Grid.Row="7" Background="#FFF9E6" Padding="8" CornerRadius="5"
+                <!-- 说明信息 -->
+                <Border Background="#FFF9E6" Padding="8" CornerRadius="5"
                 Margin="0,0,0,10" BorderBrush="#FFD700" BorderThickness="1">
             <StackPanel>
                 <TextBlock Text="循环模式说明：" FontWeight="Bold" Margin="0,0,0,3" FontSize="12"/>
@@ -258,10 +255,13 @@
                     • 提前提醒：在目标时间前开始按间隔重复提醒，到达目标时间后结束
                 </TextBlock>
             </StackPanel>
-        </Border>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
 
-        <!-- 按钮 -->
-        <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+        <!-- 按钮区域（固定在底部） -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="20,15,20,15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="确定" Width="100" Height="35" Margin="0,0,10,0"
                     Click="OkButton_Click" IsDefault="True"
                     Background="#4CAF50" Foreground="White" FontWeight="Bold"
@@ -270,6 +270,7 @@
                     Click="CancelButton_Click" IsCancel="True"
                     Background="#9E9E9E" Foreground="White" FontWeight="Bold"
                     Cursor="Hand"/>
-        </StackPanel>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>
