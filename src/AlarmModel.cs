@@ -82,6 +82,7 @@ namespace AdvancedClock
         private string _actionParameter;
         private int _actionTimeoutSeconds;
         private string _customSoundPath;
+        private int _maxPlayDurationSeconds;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -101,6 +102,7 @@ namespace AdvancedClock
             _actionParameter = string.Empty;
             _actionTimeoutSeconds = 30;
             _customSoundPath = string.Empty;
+            _maxPlayDurationSeconds = 60; // 默认播放1分钟
         }
 
         /// <summary>
@@ -292,6 +294,19 @@ namespace AdvancedClock
                 _customSoundPath = value ?? string.Empty;
                 OnPropertyChanged(nameof(CustomSoundPath));
                 OnPropertyChanged(nameof(CustomSoundText));
+            }
+        }
+
+        /// <summary>
+        /// 最大播放时长（秒），默认60秒（1分钟）
+        /// </summary>
+        public int MaxPlayDurationSeconds
+        {
+            get => _maxPlayDurationSeconds;
+            set
+            {
+                _maxPlayDurationSeconds = Math.Max(5, Math.Min(600, value)); // 限制在5-600秒之间（5秒到10分钟）
+                OnPropertyChanged(nameof(MaxPlayDurationSeconds));
             }
         }
 

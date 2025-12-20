@@ -25,4 +25,12 @@
         <EmbeddedResource Include="icon.ico" />
     </ItemGroup>
 
+    <ItemGroup>
+        <!-- 复制 sounds 目录到输出目录 -->
+        <None Include="sounds\**\*.*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>sounds\%(RecursiveDir)%(Filename)%(Extension)</Link>
+        </None>
+    </ItemGroup>
+
 </Project>

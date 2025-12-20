@@ -416,8 +416,8 @@ namespace AdvancedClock
         /// </summary>
         private void ShowWeakAlert(AlarmModel alarm)
         {
-            // 播放闹钟声音（自定义或系统默认）
-            AudioService.Instance.PlayAlarmSound(alarm.CustomSoundPath, alarm.IsStrongAlert);
+            // 播放闹钟声音（自定义或系统默认，循环播放指定时长）
+            AudioService.Instance.PlayAlarmSound(alarm.CustomSoundPath, alarm.IsStrongAlert, alarm.MaxPlayDurationSeconds);
 
             // 在UI线程上显示任务栏通知
             Dispatcher.Invoke(() =>

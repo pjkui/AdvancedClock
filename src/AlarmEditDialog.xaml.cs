@@ -36,6 +36,9 @@ namespace AdvancedClock
 
             // 初始化动作配置界面
             UpdateActionParameterVisibility();
+
+            // 初始化声音选择
+            InitializeSoundSelection();
         }
 
         /// <summary>
@@ -56,6 +59,9 @@ namespace AdvancedClock
 
             // 初始化动作配置界面
             UpdateActionParameterVisibility();
+
+            // 初始化声音选择
+            InitializeSoundSelection();
         }
 
         /// <summary>
@@ -275,6 +281,12 @@ namespace AdvancedClock
 
             // 验证并更新提前提醒设置
             if (!ValidateAndUpdateAdvanceReminder())
+            {
+                return false;
+            }
+
+            // 验证并更新声音播放时长
+            if (!ValidateAndUpdateSoundDuration())
             {
                 return false;
             }
@@ -620,18 +632,35 @@ namespace AdvancedClock
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(AlarmModel.CustomSoundPath))
+                // 获取当前选中的声音路径
+                string soundPath = string.Empty;
+
+                if (UseDefaultSoundRadio.IsChecked == true)
                 {
-                    // 播放系统默认声音
-                    AudioService.Instance.PlayAlarmSound(null, AlarmModel.IsStrongAlert);
-                    MessageBox.Show("正在播放系统默认声音", "试听",
+                    // 使用默认声音
+                    if (DefaultSoundComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem item)
+                    {
+                        soundPath = item.Tag?.ToString() ?? string.Empty;
+                    }
+                }
+                else
+                {
+                    // 使用自定义声音
+                    soundPath = AlarmModel.CustomSoundPath;
+                }
+
+                if (string.IsNullOrWhiteSpace(soundPath))
+                {
+                    // 播放系统默认声音（5秒）
+                    AudioService.Instance.PlayAlarmSound(null, AlarmModel.IsStrongAlert, 5);
+                    MessageBox.Show("正在播放系统默认声音（5秒）", "试听",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                else if (System.IO.File.Exists(AlarmModel.CustomSoundPath))
+                else if (System.IO.File.Exists(soundPath))
                 {
-                    // 播放自定义声音
-                    AudioService.Instance.PlayAlarmSound(AlarmModel.CustomSoundPath, AlarmModel.IsStrongAlert);
-                    MessageBox.Show($"正在播放：\n{System.IO.Path.GetFileName(AlarmModel.CustomSoundPath)}",
+                    // 播放自定义声音（5秒）
+                    AudioService.Instance.PlayAlarmSound(soundPath, AlarmModel.IsStrongAlert, 5);
+                    MessageBox.Show($"正在播放：\n{System.IO.Path.GetFileName(soundPath)}\n\n试听时长：5秒",
                         "试听", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
@@ -653,6 +682,8 @@ namespace AdvancedClock
         private void ClearSound_Click(object sender, RoutedEventArgs e)
         {
             AlarmModel.CustomSoundPath = string.Empty;
+            UseDefaultSoundRadio.IsChecked = true;
+            DefaultSoundComboBox.SelectedIndex = 0; // 选中系统默认
             MessageBox.Show("已清除自定义声音，将使用系统默认声音", "提示",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -675,6 +706,167 @@ namespace AdvancedClock
                 AlarmModel.ActionParameter = openFileDialog.FileName;
                 PythonScriptTextBox.Text = openFileDialog.FileName;
             }
+        }
+
+        /// <summary>
+        /// 初始化声音选择
+        /// </summary>
+        private void InitializeSoundSelection()
+        {
+            // 确保控件已初始化
+            if (DefaultSoundComboBox == null || MaxPlayDurationTextBox == null)
+            {
+                return;
+            }
+
+            // 加载默认声音列表
+            LoadDefaultSounds();
+
+            // 初始化播放时长输入框
+            MaxPlayDurationTextBox.Text = AlarmModel.MaxPlayDurationSeconds.ToString();
+
+            // 根据当前声音路径设置选择状态
+            if (string.IsNullOrWhiteSpace(AlarmModel.CustomSoundPath))
+            {
+                UseDefaultSoundRadio.IsChecked = true;
+            }
+            else
+            {
+                // 检查是否是默认声音
+                var defaultSounds = AudioService.GetDefaultSounds();
+                if (defaultSounds.Contains(AlarmModel.CustomSoundPath))
+                {
+                    UseDefaultSoundRadio.IsChecked = true;
+                    // 选中对应的默认声音
+                    for (int i = 0; i < DefaultSoundComboBox.Items.Count; i++)
+                    {
+                        var item = DefaultSoundComboBox.Items[i] as System.Windows.Controls.ComboBoxItem;
+                        if (item?.Tag?.ToString() == AlarmModel.CustomSoundPath)
+                        {
+                            DefaultSoundComboBox.SelectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    UseCustomSoundRadio.IsChecked = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 加载默认声音列表
+        /// </summary>
+        private void LoadDefaultSounds()
+        {
+            // 确保控件已初始化
+            if (DefaultSoundComboBox == null)
+            {
+                return;
+            }
+
+            DefaultSoundComboBox.Items.Clear();
+
+            // 添加系统默认选项
+            var systemDefaultItem = new System.Windows.Controls.ComboBoxItem
+            {
+                Content = "系统默认声音",
+                Tag = string.Empty
+            };
+            DefaultSoundComboBox.Items.Add(systemDefaultItem);
+
+            // 获取 sounds/defaults 目录下的所有声音文件
+            var defaultSounds = AudioService.GetDefaultSounds();
+
+            if (defaultSounds.Count > 0)
+            {
+                foreach (var soundPath in defaultSounds)
+                {
+                    var fileName = System.IO.Path.GetFileName(soundPath);
+                    var item = new System.Windows.Controls.ComboBoxItem
+                    {
+                        Content = fileName,
+                        Tag = soundPath
+                    };
+                    DefaultSoundComboBox.Items.Add(item);
+                }
+            }
+            else
+            {
+                // 如果没有默认声音，添加提示
+                var noSoundItem = new System.Windows.Controls.ComboBoxItem
+                {
+                    Content = "（没有找到默认声音文件）",
+                    Tag = string.Empty,
+                    IsEnabled = false
+                };
+                DefaultSoundComboBox.Items.Add(noSoundItem);
+            }
+
+            // 默认选中第一项（系统默认）
+            DefaultSoundComboBox.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// 声音源改变事件
+        /// </summary>
+        private void SoundSourceChanged(object sender, RoutedEventArgs e)
+        {
+            // 防止在初始化阶段访问未创建的控件
+            if (DefaultSoundPanel == null || CustomSoundPanel == null)
+            {
+                return;
+            }
+
+            if (UseDefaultSoundRadio.IsChecked == true)
+            {
+                DefaultSoundPanel.Visibility = Visibility.Visible;
+                CustomSoundPanel.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                DefaultSoundPanel.Visibility = Visibility.Collapsed;
+                CustomSoundPanel.Visibility = Visibility.Visible;
+            }
+        }
+
+        /// <summary>
+        /// 默认声音下拉框选择改变事件
+        /// </summary>
+        private void DefaultSoundComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            // 防止在初始化阶段访问
+            if (DefaultSoundComboBox == null || AlarmModel == null)
+            {
+                return;
+            }
+
+            if (DefaultSoundComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem item)
+            {
+                string soundPath = item.Tag?.ToString() ?? string.Empty;
+                AlarmModel.CustomSoundPath = soundPath;
+            }
+        }
+
+        /// <summary>
+        /// 验证并更新声音播放时长
+        /// </summary>
+        private bool ValidateAndUpdateSoundDuration()
+        {
+            // 验证播放时长
+            if (!int.TryParse(MaxPlayDurationTextBox.Text, out int duration) || duration < 5 || duration > 600)
+            {
+                MessageBox.Show("播放时长必须是5-600秒之间的数字！\n\n提示：60秒=1分钟，300秒=5分钟，600秒=10分钟",
+                    "输入错误", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MaxPlayDurationTextBox.Focus();
+                return false;
+            }
+
+            // 更新播放时长
+            AlarmModel.MaxPlayDurationSeconds = duration;
+
+            return true;
         }
     }
 }

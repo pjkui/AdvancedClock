@@ -210,35 +210,79 @@
             <StackPanel>
                 <TextBlock Text="选择闹钟提醒声音：" Margin="0,0,0,8" FontSize="12" FontWeight="Normal"/>
 
-                <!-- 声音文件选择 -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <!-- 声音选择方式 -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <RadioButton x:Name="UseDefaultSoundRadio" Content="使用默认声音库"
+                                 IsChecked="True" Margin="0,0,20,0" FontSize="12"
+                                 Checked="SoundSourceChanged"/>
+                    <RadioButton x:Name="UseCustomSoundRadio" Content="自定义声音文件"
+                                 FontSize="12" Checked="SoundSourceChanged"/>
+                </StackPanel>
 
-                    <TextBox x:Name="SoundPathTextBox" Grid.Column="0" Height="30"
-                             Text="{Binding CustomSoundPath, UpdateSourceTrigger=PropertyChanged}"
-                             FontSize="12" Padding="5" Margin="0,0,5,0" IsReadOnly="True"
-                             Background="#F5F5F5"/>
+                <!-- 默认声音下拉选择 -->
+                <StackPanel x:Name="DefaultSoundPanel" Visibility="Visible">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <Button x:Name="BrowseSoundButton" Grid.Column="1" Content="浏览..."
-                            Width="70" Height="30" Click="BrowseSound_Click"
-                            Background="#9C27B0" Foreground="White" FontSize="11" Margin="0,0,5,0"/>
+                        <ComboBox x:Name="DefaultSoundComboBox" Grid.Column="0" Height="30"
+                                  FontSize="12" Margin="0,0,5,0"
+                                  SelectionChanged="DefaultSoundComboBox_SelectionChanged"/>
 
-                    <Button x:Name="TestSoundButton" Grid.Column="2" Content="试听"
-                            Width="60" Height="30" Click="TestSound_Click"
-                            Background="#FF9800" Foreground="White" FontSize="11"/>
-                </Grid>
+                        <Button x:Name="TestDefaultSoundButton" Grid.Column="1" Content="试听"
+                                Width="60" Height="30" Click="TestSound_Click"
+                                Background="#FF9800" Foreground="White" FontSize="11"/>
+                    </Grid>
+                    <TextBlock Text="  从 sounds/defaults 目录选择预设声音"
+                               FontSize="10" Foreground="#666" Margin="0,5,0,0"/>
+                </StackPanel>
 
-                <TextBlock Text="  支持格式: WAV, MP3, WMA, M4A（留空使用系统默认声音）"
-                           FontSize="10" Foreground="#666" Margin="0,5,0,0"/>
+                <!-- 自定义声音文件选择 -->
+                <StackPanel x:Name="CustomSoundPanel" Visibility="Collapsed">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox x:Name="SoundPathTextBox" Grid.Column="0" Height="30"
+                                 Text="{Binding CustomSoundPath, UpdateSourceTrigger=PropertyChanged}"
+                                 FontSize="12" Padding="5" Margin="0,0,5,0" IsReadOnly="True"
+                                 Background="#F5F5F5"/>
+
+                        <Button x:Name="BrowseSoundButton" Grid.Column="1" Content="浏览..."
+                                Width="70" Height="30" Click="BrowseSound_Click"
+                                Background="#9C27B0" Foreground="White" FontSize="11" Margin="0,0,5,0"/>
+
+                        <Button x:Name="TestSoundButton" Grid.Column="2" Content="试听"
+                                Width="60" Height="30" Click="TestSound_Click"
+                                Background="#FF9800" Foreground="White" FontSize="11"/>
+                    </Grid>
+
+                    <TextBlock Text="  支持格式: WAV, MP3, WMA, M4A"
+                               FontSize="10" Foreground="#666" Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <!-- 播放时长设置 -->
+                <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                    <TextBlock Text="循环播放时长：" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="12"/>
+                    <TextBox x:Name="MaxPlayDurationTextBox" Width="60" Height="25" TextAlignment="Center"
+                             Text="{Binding MaxPlayDurationSeconds, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="12" Margin="0,0,5,0"/>
+                    <TextBlock Text="秒" VerticalAlignment="Center" FontSize="12" Margin="0,0,10,0"/>
+                    <TextBlock Text="（5-600秒，默认60秒=1分钟）" VerticalAlignment="Center"
+                               FontSize="10" Foreground="#999"/>
+                </StackPanel>
+                <TextBlock Text="  提示：声音将循环播放直到达到设定时长后自动停止"
+                           FontSize="10" Foreground="#FF9800" Margin="0,5,0,0" TextWrapping="Wrap"/>
 
                 <Button x:Name="ClearSoundButton" Content="清除（使用系统默认）"
                         Width="150" Height="25" Click="ClearSound_Click"
                         Background="#757575" Foreground="White" FontSize="10"
-                        Margin="0,8,0,0" HorizontalAlignment="Left"/>
+                        Margin="0,10,0,0" HorizontalAlignment="Left"/>
             </StackPanel>
         </GroupBox>
 
