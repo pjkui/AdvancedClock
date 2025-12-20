@@ -30,7 +30,13 @@ namespace AdvancedClock
         /// 按年循环
         /// </summary>
         [Description("每年")]
-        Yearly
+        Yearly,
+
+        /// <summary>
+        /// 按农历日期循环（每年农历同一天）
+        /// </summary>
+        [Description("每年农历")]
+        LunarYearly
     }
 
     /// <summary>
@@ -83,6 +89,10 @@ namespace AdvancedClock
         private int _actionTimeoutSeconds;
         private string _customSoundPath;
         private int _maxPlayDurationSeconds;
+        private bool _isLunarCalendar;
+        private int _lunarMonth;
+        private int _lunarDay;
+        private bool _isLeapMonth;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -103,6 +113,10 @@ namespace AdvancedClock
             _actionTimeoutSeconds = 30;
             _customSoundPath = string.Empty;
             _maxPlayDurationSeconds = 60; // 默认播放1分钟
+            _isLunarCalendar = false;
+            _lunarMonth = 1;
+            _lunarDay = 1;
+            _isLeapMonth = false;
         }
 
         /// <summary>
@@ -311,6 +325,63 @@ namespace AdvancedClock
         }
 
         /// <summary>
+        /// 是否使用农历日期
+        /// </summary>
+        public bool IsLunarCalendar
+        {
+            get => _isLunarCalendar;
+            set
+            {
+                _isLunarCalendar = value;
+                OnPropertyChanged(nameof(IsLunarCalendar));
+                OnPropertyChanged(nameof(DisplayTime));
+                OnPropertyChanged(nameof(RepeatModeText));
+            }
+        }
+
+        /// <summary>
+        /// 农历月份（1-12）
+        /// </summary>
+        public int LunarMonth
+        {
+            get => _lunarMonth;
+            set
+            {
+                _lunarMonth = Math.Max(1, Math.Min(12, value));
+                OnPropertyChanged(nameof(LunarMonth));
+                OnPropertyChanged(nameof(DisplayTime));
+            }
+        }
+
+        /// <summary>
+        /// 农历日期（1-30）
+        /// </summary>
+        public int LunarDay
+        {
+            get => _lunarDay;
+            set
+            {
+                _lunarDay = Math.Max(1, Math.Min(30, value));
+                OnPropertyChanged(nameof(LunarDay));
+                OnPropertyChanged(nameof(DisplayTime));
+            }
+        }
+
+        /// <summary>
+        /// 是否为闰月
+        /// </summary>
+        public bool IsLeapMonth
+        {
+            get => _isLeapMonth;
+            set
+            {
+                _isLeapMonth = value;
+                OnPropertyChanged(nameof(IsLeapMonth));
+                OnPropertyChanged(nameof(DisplayTime));
+            }
+        }
+
+        /// <summary>
         /// 自定义声音显示文本（用于UI）
         /// </summary>
         public string CustomSoundText
@@ -327,7 +398,41 @@ namespace AdvancedClock
         /// <summary>
         /// 显示时间（用于UI）
         /// </summary>
-        public string DisplayTime => _alarmTime.ToString("yyyy-MM-dd HH:mm:ss");
+        public string DisplayTime
+        {
+            get
+            {
+                if (_isLunarCalendar)
+                {
+                    try
+                    {
+                        var lunar = LunarCalendarService.SolarToLunar(_alarmTime.Date);
+                        string lunarDateStr = $"{(_isLeapMonth ? "闰" : "")}{GetLunarMonthName(_lunarMonth)}{GetLunarDayName(_lunarDay)}";
+                        return $"{lunarDateStr} {_alarmTime:HH:mm:ss} (公历:{_alarmTime:yyyy-MM-dd})";
+                    }
+                    catch
+                    {
+                        return $"农历{(_isLeapMonth ? "闰" : "")}{_lunarMonth}月{_lunarDay}日 {_alarmTime:HH:mm:ss}";
+                    }
+                }
+                return _alarmTime.ToString("yyyy-MM-dd HH:mm:ss");
+            }
+        }
+
+        private static string GetLunarMonthName(int month)
+        {
+            string[] monthNames = { "", "正月", "二月", "三月", "四月", "五月", "六月",
+                                   "七月", "八月", "九月", "十月", "冬月", "腊月" };
+            return month >= 1 && month <= 12 ? monthNames[month] : month.ToString();
+        }
+
+        private static string GetLunarDayName(int day)
+        {
+            string[] dayNames = { "", "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+                                 "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+                                 "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十" };
+            return day >= 1 && day <= 30 ? dayNames[day] : day.ToString();
+        }
 
         /// <summary>
         /// 循环模式文本（用于UI）
@@ -336,12 +441,17 @@ namespace AdvancedClock
         {
             get
             {
+                if (_isLunarCalendar && _repeatMode == AlarmRepeatMode.LunarYearly)
+                {
+                    return "每年农历";
+                }
                 return _repeatMode switch
                 {
                     AlarmRepeatMode.None => "不循环",
                     AlarmRepeatMode.Daily => "每天",
                     AlarmRepeatMode.Monthly => "每月",
                     AlarmRepeatMode.Yearly => "每年",
+                    AlarmRepeatMode.LunarYearly => "每年农历",
                     _ => "未知"
                 };
             }
@@ -722,6 +832,34 @@ namespace AdvancedClock
                     while (nextTime <= now)
                     {
                         nextTime = nextTime.AddYears(1);
+                    }
+                    break;
+
+                case AlarmRepeatMode.LunarYearly:
+                    // 按农历年循环
+                    if (_isLunarCalendar)
+                    {
+                        try
+                        {
+                            nextTime = LunarCalendarService.GetNextLunarAlarmTime(
+                                _lunarMonth, _lunarDay, _isLeapMonth, now, _alarmTime);
+                        }
+                        catch
+                        {
+                            // 如果农历转换失败，按公历年循环
+                            while (nextTime <= now)
+                            {
+                                nextTime = nextTime.AddYears(1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // 如果不是农历模式，按公历年循环
+                        while (nextTime <= now)
+                        {
+                            nextTime = nextTime.AddYears(1);
+                        }
                     }
                     break;
             }

@@ -56,13 +56,58 @@
             <TextBlock Text="循环模式：" FontWeight="Bold" Margin="0,0,0,5"/>
             <ComboBox x:Name="RepeatModeComboBox" Height="30" FontSize="14"
                       SelectedValue="{Binding RepeatMode, Mode=TwoWay}"
-                      SelectedValuePath="Tag">
+                      SelectedValuePath="Tag"
+                      SelectionChanged="RepeatModeComboBox_SelectionChanged">
                 <ComboBoxItem Content="不循环（一次性）" Tag="{x:Static local:AlarmRepeatMode.None}"/>
                 <ComboBoxItem Content="每天" Tag="{x:Static local:AlarmRepeatMode.Daily}"/>
                 <ComboBoxItem Content="每月" Tag="{x:Static local:AlarmRepeatMode.Monthly}"/>
                 <ComboBoxItem Content="每年" Tag="{x:Static local:AlarmRepeatMode.Yearly}"/>
+                <ComboBoxItem Content="每年农历" Tag="{x:Static local:AlarmRepeatMode.LunarYearly}"/>
             </ComboBox>
         </StackPanel>
+
+                <!-- 农历日期选择（仅在选择"每年农历"时显示） -->
+                <GroupBox x:Name="LunarDatePanel" Header="🌙 农历日期设置" FontWeight="Bold" FontSize="13"
+                          Margin="0,0,0,15" Padding="10" BorderBrush="#FF9800" BorderThickness="2"
+                          Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="选择农历日期：" Margin="0,0,0,8" FontSize="12" FontWeight="Normal"/>
+
+                        <!-- 农历月份和日期选择 -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="农历月份：" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <ComboBox x:Name="LunarMonthComboBox" Grid.Column="1" Height="30" FontSize="12"
+                                      Margin="0,0,10,0" SelectionChanged="LunarDateChanged"/>
+
+                            <TextBlock Grid.Column="2" Text="农历日期：" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <ComboBox x:Name="LunarDayComboBox" Grid.Column="3" Height="30" FontSize="12"
+                                      Margin="0,0,10,0" SelectionChanged="LunarDateChanged"/>
+
+                            <CheckBox x:Name="IsLeapMonthCheckBox" Grid.Column="4" Content="闰月"
+                                      VerticalAlignment="Center" FontSize="12"
+                                      Checked="LunarDateChanged" Unchecked="LunarDateChanged"/>
+                        </Grid>
+
+                        <!-- 当前农历日期显示 -->
+                        <TextBlock x:Name="CurrentLunarDateText" Text="当前公历日期对应的农历："
+                                   FontSize="11" Foreground="#666" Margin="0,8,0,0" TextWrapping="Wrap"/>
+
+                        <!-- 对应公历日期显示 -->
+                        <TextBlock x:Name="CorrespondingSolarDateText" Text="选择的农历日期对应的公历："
+                                   FontSize="11" Foreground="#2196F3" Margin="0,5,0,0" TextWrapping="Wrap"/>
+
+                        <TextBlock Text="  提示：农历闹钟会在每年的农历指定日期触发，公历日期会自动计算"
+                                   FontSize="10" Foreground="#FF9800" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </GroupBox>
 
                 <!-- 闹钟消息 -->
                 <StackPanel Margin="0,0,0,15">
@@ -296,6 +341,7 @@
                     • 每天：每天在设定的时间触发<LineBreak/>
                     • 每月：每月在设定的日期和时间触发<LineBreak/>
                     • 每年：每年在设定的月份、日期和时间触发<LineBreak/>
+                    • 每年农历：每年在农历指定日期触发（如农历生日、节日等）<LineBreak/>
                     • 提前提醒：在目标时间前开始按间隔重复提醒，到达目标时间后结束
                 </TextBlock>
             </StackPanel>

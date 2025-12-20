@@ -218,6 +218,26 @@ namespace AdvancedClock
         {
             var now = HighPrecisionClock.Now;
             CurrentTimeText.Text = now.ToString("yyyy-MM-dd HH:mm:ss.fff dddd");
+
+            // 更新农历日期显示
+            UpdateLunarDate(now);
+        }
+
+        /// <summary>
+        /// 更新农历日期显示
+        /// </summary>
+        private void UpdateLunarDate(DateTime currentTime)
+        {
+            try
+            {
+                var lunarDate = LunarCalendarService.SolarToLunar(currentTime);
+                LunarDateText.Text = lunarDate.DisplayText;
+            }
+            catch (Exception ex)
+            {
+                LunarDateText.Text = "农历日期获取失败";
+                System.Diagnostics.Debug.WriteLine($"获取农历日期失败: {ex.Message}");
+            }
         }
 
         /// <summary>

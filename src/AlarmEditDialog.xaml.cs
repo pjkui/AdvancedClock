@@ -39,6 +39,9 @@ namespace AdvancedClock
 
             // 初始化声音选择
             InitializeSoundSelection();
+
+            // 初始化农历选择
+            InitializeLunarSelection();
         }
 
         /// <summary>
@@ -62,6 +65,9 @@ namespace AdvancedClock
 
             // 初始化声音选择
             InitializeSoundSelection();
+
+            // 初始化农历选择
+            InitializeLunarSelection();
         }
 
         /// <summary>
@@ -868,5 +874,197 @@ namespace AdvancedClock
 
             return true;
         }
+
+        #region 农历相关方法
+
+        /// <summary>
+        /// 初始化农历选择控件
+        /// </summary>
+        private void InitializeLunarSelection()
+        {
+            // 填充农历月份下拉框
+            var monthNames = LunarCalendarService.GetMonthNames();
+            for (int i = 0; i < monthNames.Count; i++)
+            {
+                var item = new System.Windows.Controls.ComboBoxItem
+                {
+                    Content = monthNames[i],
+                    Tag = i + 1
+                };
+                LunarMonthComboBox.Items.Add(item);
+            }
+
+            // 填充农历日期下拉框
+            var dayNames = LunarCalendarService.GetDayNames();
+            for (int i = 0; i < dayNames.Count; i++)
+            {
+                var item = new System.Windows.Controls.ComboBoxItem
+                {
+                    Content = dayNames[i],
+                    Tag = i + 1
+                };
+                LunarDayComboBox.Items.Add(item);
+            }
+
+            // 设置当前值
+            if (AlarmModel.IsLunarCalendar)
+            {
+                LunarMonthComboBox.SelectedIndex = AlarmModel.LunarMonth - 1;
+                LunarDayComboBox.SelectedIndex = AlarmModel.LunarDay - 1;
+                IsLeapMonthCheckBox.IsChecked = AlarmModel.IsLeapMonth;
+            }
+            else
+            {
+                // 默认选择正月初一
+                LunarMonthComboBox.SelectedIndex = 0;
+                LunarDayComboBox.SelectedIndex = 0;
+                IsLeapMonthCheckBox.IsChecked = false;
+            }
+
+            // 更新农历面板可见性
+            UpdateLunarPanelVisibility();
+
+            // 更新当前农历日期显示
+            UpdateCurrentLunarDateDisplay();
+        }
+
+        /// <summary>
+        /// 循环模式改变事件
+        /// </summary>
+        private void RepeatModeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            UpdateLunarPanelVisibility();
+        }
+
+        /// <summary>
+        /// 更新农历面板可见性
+        /// </summary>
+        private void UpdateLunarPanelVisibility()
+        {
+            if (LunarDatePanel == null || RepeatModeComboBox == null)
+                return;
+
+            // 只有选择"每年农历"时才显示农历面板
+            if (RepeatModeComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem item)
+            {
+                if (item.Tag is AlarmRepeatMode mode && mode == AlarmRepeatMode.LunarYearly)
+                {
+                    LunarDatePanel.Visibility = Visibility.Visible;
+                    AlarmModel.IsLunarCalendar = true;
+                    UpdateCorrespondingSolarDate();
+                }
+                else
+                {
+                    LunarDatePanel.Visibility = Visibility.Collapsed;
+                    AlarmModel.IsLunarCalendar = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 农历日期改变事件
+        /// </summary>
+        private void LunarDateChanged(object sender, System.Windows.RoutedEventArgs e)
+        {
+            UpdateCorrespondingSolarDate();
+        }
+
+        /// <summary>
+        /// 更新当前农历日期显示
+        /// </summary>
+        private void UpdateCurrentLunarDateDisplay()
+        {
+            if (CurrentLunarDateText == null)
+                return;
+
+            try
+            {
+                var currentDate = DateTime.Now;
+                var lunarDate = LunarCalendarService.SolarToLunar(currentDate);
+                CurrentLunarDateText.Text = $"当前公历日期对应的农历：{lunarDate.DisplayText}";
+            }
+            catch (Exception ex)
+            {
+                CurrentLunarDateText.Text = $"无法获取当前农历日期：{ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 更新对应的公历日期显示
+        /// </summary>
+        private void UpdateCorrespondingSolarDate()
+        {
+            if (CorrespondingSolarDateText == null ||
+                LunarMonthComboBox == null ||
+                LunarDayComboBox == null ||
+                IsLeapMonthCheckBox == null)
+                return;
+
+            try
+            {
+                if (LunarMonthComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem monthItem &&
+                    LunarDayComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem dayItem)
+                {
+                    int month = (int)monthItem.Tag;
+                    int day = (int)dayItem.Tag;
+                    bool isLeapMonth = IsLeapMonthCheckBox.IsChecked == true;
+
+                    // 保存到模型
+                    AlarmModel.LunarMonth = month;
+                    AlarmModel.LunarDay = day;
+                    AlarmModel.IsLeapMonth = isLeapMonth;
+
+                    // 计算对应的公历日期（使用当前年份或下一年）
+                    var currentDate = DateTime.Now;
+                    var currentLunar = LunarCalendarService.SolarToLunar(currentDate);
+
+                    // 尝试当前年份
+                    try
+                    {
+                        var solarDate = LunarCalendarService.LunarToSolar(currentLunar.Year, month, day, isLeapMonth);
+
+                        // 如果日期已过，尝试下一年
+                        if (solarDate < currentDate.Date)
+                        {
+                            solarDate = LunarCalendarService.LunarToSolar(currentLunar.Year + 1, month, day, isLeapMonth);
+                        }
+
+                        // 更新闹钟时间的日期部分（保留时分秒）
+                        AlarmModel.AlarmTime = new DateTime(
+                            solarDate.Year, solarDate.Month, solarDate.Day,
+                            AlarmModel.AlarmTime.Hour, AlarmModel.AlarmTime.Minute, AlarmModel.AlarmTime.Second);
+
+                        string leapText = isLeapMonth ? "闰" : "";
+                        CorrespondingSolarDateText.Text =
+                            $"选择的农历日期对应的公历：{leapText}{GetLunarMonthName(month)}{GetLunarDayName(day)} → {solarDate:yyyy年MM月dd日}";
+                    }
+                    catch (Exception ex)
+                    {
+                        CorrespondingSolarDateText.Text = $"无法转换：{ex.Message}";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CorrespondingSolarDateText.Text = $"转换错误：{ex.Message}";
+            }
+        }
+
+        private static string GetLunarMonthName(int month)
+        {
+            string[] monthNames = { "", "正月", "二月", "三月", "四月", "五月", "六月",
+                                   "七月", "八月", "九月", "十月", "冬月", "腊月" };
+            return month >= 1 && month <= 12 ? monthNames[month] : month.ToString();
+        }
+
+        private static string GetLunarDayName(int day)
+        {
+            string[] dayNames = { "", "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+                                 "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+                                 "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十" };
+            return day >= 1 && day <= 30 ? dayNames[day] : day.ToString();
+        }
+
+        #endregion
     }
 }
